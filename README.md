@@ -45,6 +45,10 @@ For running a specific test: [TO COMPLETE]
 See test coverage : [TO COMPLETE]
 
 
+## Docs
+
+- [More about the numerical features generator](docs/models/numericalFeature.md): the numerical features generator allows to convert and harmonize information. In the specific context of sketches, it converts and harmonizes all the parameters characterizing the nodes (primitives) or the edges (constraints) of a sketch.
+
 ## Good pratices 
 
 ### PEP8
@@ -57,3 +61,5 @@ autopep8 --in-place --aggressive --aggressive ./
 
 
 ### FLAKE8
+
+

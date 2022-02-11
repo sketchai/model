@@ -10,6 +10,8 @@ class NumericalFeatureEncoding(torch.nn.Module):
 
         This encodes a sequence of features (presented as a sequence of integers)
         into a sequence of vector through an embedding.
+    ----------------------------
+    Source : SketchGraph model. sketchgraphs_models/graph/model/numerical_features.py
     """
 
     def __init__(self, feature_dims, embedding_dim):
@@ -19,8 +21,9 @@ class NumericalFeatureEncoding(torch.nn.Module):
             'feature_offsets',
             torch.cumsum(torch.tensor([0] + feature_dims[:-1], dtype=torch.int64), dim=0))  # Save feature_offsets into the gpu
 
-        logger.debug(f'feature dim : {self.feature_offsets}')
+        logger.debug(f'feature dim : {self.feature_offsets}')  # Decalage des paramètres 
         self.embeddings = torch.nn.Embedding(sum(feature_dims), embedding_dim, sparse=False)
 
     def forward(self, features):
+
         return self.embeddings(features + self.feature_offsets)

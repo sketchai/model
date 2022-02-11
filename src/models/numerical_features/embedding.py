@@ -6,6 +6,9 @@ class NumericalFeaturesEmbedding(torch.nn.Module):
 
     Currently, this module simply aggregates the features by averaging, although more
     elaborate aggregation schemes (e.g. RNN) could be chosen.
+
+    ----------------------------
+    Source : SketchGraph model. sketchgraphs_models/graph/model/numerical_features.py
     """
 
     def __init__(self):
