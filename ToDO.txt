@@ -1,0 +1,9 @@
+- Continuer l'analyse des numericals Features Embeddings 
+    -> il y a des choses peut claire concernant : 
+        1 ) Le choix de l'offset dans le numericalEncoding
+
+- Ecrire une doc permettant de présenter l'architecture des réseaux de neurones 
+(Faire qqc un peu détaillée pour chaque couche, cela permettra de commenter plus facilement)
+
+
+- Mettre au propre ce que fait DenseSparsePreEmbedding / compris
