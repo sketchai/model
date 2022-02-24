@@ -2,17 +2,17 @@
 
 
 1. Generate a conda env 
-First, create and activate a basic conda env from the [env_deep.yml](./env/env_deep.yml) file. 
+First, create and activate a basic conda env from the [env_gat.yml](./env/env_gat.yml) file. 
 
 Run 
 ```
-    conda env create -f ./env/env_deep.yml
+    conda env create -f ./env/env_gat.yml
 ```
 
 then 
 
 ```
-    conda activate basic_conda
+    conda activate env_gat
 ```
 
 NB: it can be good to change the conda name env into [env_basic_conda.yml](./env/env_basic_conda.yml) file.
