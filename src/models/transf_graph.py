@@ -1,13 +1,13 @@
 import numpy as np
 import torch
 from typing import Dict
-
+import pytorch_lightning as pl
 
 from src.models.numerical_features.generator import generate_embedding
 from src.models.dense_emb import DenseSparsePreEmbedding, ConcatenateLinear
 
 
-class GravTransformer(torch.nn.Module):
+class GaT(pl.Module):
     """
     The neural network. Some utilitaries are included.
     """
@@ -30,7 +30,12 @@ class GravTransformer(torch.nn.Module):
 
         embedding_dim, n_head, num_layers, do_positional_encoding : bool = True, lMax : int
         """
-        super(GravTransformer, self).__init__()
+        super().__init__()
+
+        self.init_model(embedding_dim, n_head, num_layers, d_preprocessing_params)
+        self.d_optimizer = {'lr' : , 'scheduler_step'  : , 'scheduler_lr' : } #TODO
+
+    def init_model(self, embedding_dim: int, n_head: int, num_layers: int, d_preprocessing_params: Dict = {}):
         self.lMax = d_preprocessing_params.get('lMax')
         self.embedding_dim = embedding_dim
 
@@ -128,3 +133,4 @@ class GravTransformer(torch.nn.Module):
 
         return ([n_edges_pos_predicted_pos, n_edges_predicted_pos, n_edges_pos],
                 [n_edges_i_predicted_i.tolist(), n_edges_predicted_i.tolist(), n_edges_i.tolist()])
+
