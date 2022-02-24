@@ -1,0 +1,25 @@
+
+
+logger:
+  save_dir : 'experiment/results'
+  name : 'gat_logs'
+
+train_data: # Train data related parameters
+  num_workers: 16
+  path_data: "tests/asset/dataset/sg_test_final.npy" # "sg_t16_validation_final.npy"  #folder or file name (should end with .npy)
+  path_weights: "tests/asset/dataset/sg_test_final.npy"  # "sg_t16_validation_weights.npy" # 
+  n_slice: 9 #None
+
+val_data: # Test data related parameters
+    num_workers: 16
+    num_batch_eval: 20
+    name_data: "tests/asset/dataset/sg_test_final.npy"
+    name_weights: "tests/asset/dataset/sg_test_final.npy"
+
+train:
+    prep_parms_path: "tests/asset/dataset/preprocessing_params.pkl" #"preprocessing_params.pkl" # 
+    batch_size: 2
+    prop_max_edges_given: 0.1
+    lr: !!float 5e-4
+    scheduler_lr: True
+    scheduler_step: 2
