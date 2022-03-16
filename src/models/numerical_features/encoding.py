@@ -21,7 +21,7 @@ class NumericalFeatureEncoding(torch.nn.Module):
             'feature_offsets',
             torch.cumsum(torch.tensor([0] + feature_dims[:-1], dtype=torch.int64), dim=0))  # Save feature_offsets into the gpu
 
-        logger.debug(f'feature dim : {self.feature_offsets}')  # Decalage des paramètres 
+        # logger.debug(f'feature dim : {self.feature_offsets}')  # Decalage des paramètres 
         self.embeddings = torch.nn.Embedding(sum(feature_dims), embedding_dim, sparse=False)
 
     def forward(self, features):

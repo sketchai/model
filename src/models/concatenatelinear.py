@@ -1,6 +1,10 @@
 import torch
 
 
+import logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger()
+
 class ConcatenateLinear(torch.nn.Module):
     """
         A torch nn module that concatenates several inputs and mixes them using a linear layer.
