@@ -4,6 +4,7 @@ from typing import Dict
 import pytorch_lightning as pl
 import logging
 
+from src.models.gat import GaT
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger()
@@ -13,6 +14,9 @@ class PredictSketch(pl.LightningModule):
         super().__init__()
         self.model = model
         self.d_optimizer = conf.get('optimizer')
+
+        d_validation = conf.get('val_data')
+        self.coef_neg = d_validation.get('coef_neg')
 
 
     def configure_optimizers(self):
@@ -25,7 +29,7 @@ class PredictSketch(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         prediction = self.model(batch)
-        loss = GaT.loss(prediction, batch, coef_neg=coef_neg, weight_types=weight_types)
+        loss = GaT.loss(prediction, batch, coef_neg=self.coef_neg, weight_types=None)
         return loss 
 
     def validation_step(self, batch, batch_idx):
@@ -34,13 +38,17 @@ class PredictSketch(pl.LightningModule):
 
         with torch.no_grad():
             prediction = self.model(batch)
-            loss = GravTransformer.loss(prediction, batch, coef_neg=coef_neg, weight_types=weight_types).item()
-            perfs = GravTransformer.performances(prediction, batch)
+            loss = GaT.loss(prediction, batch, coef_neg=self.coef_neg, weight_types=None).item()
+            perfs = GaT.performances(prediction, batch)
 
             # Save loss
-            self.log('val_loss', val_loss)
-            self.log('val_perf_edge', perfs[0])
-            self.log('val_perf_type', perfs[1])
+            self.log('val_loss', loss)
+            self.log('val_perf_edge.n_edges_pos_predicted_pos', perfs[0][0])
+            self.log('val_perf_edge.n_edges_predicted_pos', perfs[0][1])
+            self.log('val_perf_edge.n_edges_pos', perfs[0][2])
+
+            x = perfs[1]
+            logger.debug(f'val_perf_type {x}')
 
 
 

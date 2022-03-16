@@ -23,6 +23,8 @@ class GraBatch:
         self.positions = data['positions']
         self.is_given = data['is_given']
 
+
+
     # custom memory pinning method on custom type
     def pin_memory(self):
         self.node_features.pin_memory()

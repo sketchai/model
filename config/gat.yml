@@ -15,6 +15,7 @@ val_data: # Test data related parameters
     num_batch_eval: 20
     path_data: "tests/asset/dataset/sg_test_final.npy"
     path_weights: "tests/asset/dataset/sg_test_weights.npy"
+    coef_neg: 1.
 
 train:
     cpu: False

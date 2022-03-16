@@ -20,7 +20,7 @@ class SketchGraphDataModule(pl.LightningDataModule):
         self.collate_fn = functools.partial(collate, node_feature_dims=preprocessing_params.get('node_feature_dimensions'),
                                         edge_feature_dims=preprocessing_params.get('edge_feature_dimensions'), 
                                         lMax=preprocessing_params.get('lMax'),
-                                        prop_max_edges_given=self.d_train.get('prop_max_edges_given'))
+                                        prop_max_edges_given=conf.get('train').get('prop_max_edges_given'))
 
     def train_dataloader(self):
         logger.info('-- Load Train Set')

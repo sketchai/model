@@ -10,6 +10,7 @@ import logging
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger()
 
+from src.utils.maps import NODE_IDX_MAP, EDGE_IDX_MAP, PADDING_IDX
 
 class GaT(pl.LightningModule):
     """
@@ -78,10 +79,10 @@ class GaT(pl.LightningModule):
             Outputs :
                       (Dict) : a dict containing the following key : edges_pos, edges_neg and type
         """
-        logger.debug(f'In the forward loop: {data}')
+
         # Compute node and edge embedding
-        node_embedding = self.node_embedding(data.get('node_features'), data.get('sparse_node_features'))
-        edge_embedding = self.edge_embedding(data.get('edge_features'), data.get('sparse_edge_features'))
+        node_embedding = self.node_embedding(data.node_features, data.sparse_node_features)
+        edge_embedding = self.edge_embedding(data.edge_features, data.sparse_edge_features)
 
         # Agregate node and edge information (message passing)
         agreg = self.aggregate_by_incidence(node_embedding, data.incidences, edge_embedding)
@@ -89,25 +90,26 @@ class GaT(pl.LightningModule):
 
         # Update input with positional encoding
         if self.positional_encoding is not None:
-            input_embedding += self.positional_encoding(data.positions.tile(data.l_batch))
+            input_embedding += self.positional_encoding(data.positions.tile(data.l_batch).cuda())
 
         input_embedding = input_embedding.view((data.l_batch, self.lMax, self.embedding_dim))
         output_transformer = torch.transpose(self.transformer_encoder(torch.transpose(input_embedding, 0, 1),
-                                                                      src_key_padding_mask=data.src_key_padding_mask), 0, 1)  # Apply Transformer
+                                                                      src_key_padding_mask=data.src_key_padding_mask.cuda()), 0, 1)  # Apply Transformer
 
-        edges_neg, edges_pos = data.edges_toInf_neg, data.edges_toInf_pos
-        representation_final_edges = GravTransformer.representation_final_edges(output_transformer, edges_neg, edges_pos)
+        edges_neg, edges_pos = data.edges_toInf_neg.cuda(), data.edges_toInf_pos.cuda()
+        representation_final_edges = GaT.representation_final_edges(output_transformer, edges_neg, edges_pos)
 
         return {"edges_pos": self.prediction_edge(representation_final_edges['edges_pos']),
                 "edges_neg": self.prediction_edge(representation_final_edges['edges_neg']),
                 "type": self.prediction_type(representation_final_edges['edges_pos'])}
 
     def aggregate_by_incidence(self, node_embedding, incidence, edge_embedding):
-        edge_messages = node_embedding.index_select(0, incidence[1])
+
+        edge_messages = node_embedding.index_select(0, incidence[1].cuda())
         edge_messages = self.transform_edge_messages(edge_messages, edge_embedding)
 
         output = node_embedding.new_zeros([node_embedding.shape[0]] + list(edge_messages.shape[1:]))
-        output.index_add_(0, incidence[0], edge_messages)
+        output.index_add_(0, incidence[0].cuda(), edge_messages.cuda())
         return output
 
     def representation_final_edges(output, edges_neg, edges_pos):
@@ -120,7 +122,7 @@ class GaT(pl.LightningModule):
         loss_edge_pos = torch.mean(torch.nn.functional.softplus(-prediction['edges_pos']))
         loss_edge_neg = torch.mean(torch.nn.functional.softplus(prediction['edges_neg']))
 
-        loss_type = torch.nn.functional.cross_entropy(prediction['type'], data.edges_toInf_pos_types, weight=weight_types)
+        loss_type = torch.nn.functional.cross_entropy(prediction['type'], data.edges_toInf_pos_types.cuda(), weight=weight_types)
 
         return loss_edge_pos + coef_neg * loss_edge_neg + loss_type
 
@@ -133,13 +135,13 @@ class GaT(pl.LightningModule):
             n_edges_predicted_pos = n_edges_pos_predicted_pos + torch.sum(prediction['edges_neg'] > 0).item()
             n_edges_pos = len(prediction['edges_pos'])
 
-            types_evaluated_i = torch.arange(len(EDGE_IDX_MAP)).unsqueeze(0).to(data.edges_toInf_pos_types.device)
+            types_evaluated_i = torch.arange(len(EDGE_IDX_MAP)).unsqueeze(0).to(data.edges_toInf_pos_types.device).cuda()
             data.edges_toInf_pos_types = data.edges_toInf_pos_types.unsqueeze(1)
 
             i_predicted = torch.argmax(prediction['type'], dim=-1, keepdim=True)
-            n_edges_i_predicted_i = torch.count_nonzero((i_predicted == types_evaluated_i) & (i_predicted == data.edges_toInf_pos_types), axis=0)
+            n_edges_i_predicted_i = torch.count_nonzero((i_predicted == types_evaluated_i) & (i_predicted == data.edges_toInf_pos_types.cuda()), axis=0)
             n_edges_predicted_i = torch.count_nonzero(i_predicted == types_evaluated_i, axis=0)
-            n_edges_i = torch.count_nonzero(data.edges_toInf_pos_types == types_evaluated_i, axis=0)
+            n_edges_i = torch.count_nonzero(data.edges_toInf_pos_types.cuda() == types_evaluated_i, axis=0)
 
         return ([n_edges_pos_predicted_pos, n_edges_predicted_pos, n_edges_pos],
                 [n_edges_i_predicted_i.tolist(), n_edges_predicted_i.tolist(), n_edges_i.tolist()])

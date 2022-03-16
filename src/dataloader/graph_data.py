@@ -22,7 +22,7 @@ def convert_in_tensor(path:str, convert_tensor:bool):
 
 def load_binary_file(path:str, convert_tensor: bool = False, data_string:str = ""):
     if path.endswith('.npy'):
-        return [convert_in_tensor(path, convert_tensor=False)]
+        return [convert_in_tensor(path, convert_tensor)]
     else :
         dataset = []
         for i in range(n_slice):
@@ -52,11 +52,11 @@ class GraphDataset(torch.utils.data.Dataset):
         f_weights : str, file or folder containing the weights of the preprocessed sequences;
         n_slice: int, number of slices to concatenate, mandatory if f_seqs is a folder.
         """
-        logger.debug('Load datasets')
+        logger.debug('Load datasets...')
         self.datasets = load_binary_file(path_seq, convert_tensor=False, data_string= 'final')
         self.cumulative_sizes = self.cumsum(self.datasets)
         logger.debug('Load weights')
-        self.weights = load_binary_file(path_weights, convert_tensor=True, data_string= 'weights')
+        self.weights = load_binary_file(path_weights, convert_tensor=False, data_string= 'weights')
 
 
     def __len__(self):

@@ -69,4 +69,4 @@ trainer.fit(sketchPredictionmodel, datamodule=data)
 
 
 ######## STEP 3 : Compute validation
-trainer.test(test_dataloaders=test)
+# trainer.test(test_dataloaders=test)
