@@ -1,5 +1,4 @@
-from src.dataloader.graph_data import GraphDataset, GraBatch
-
+from src.dataloader.batch_data import GraBatch
 
 def collate(batch, node_feature_dims, edge_feature_dims, lMax, prop_max_edges_given=0.9, generation=False, mask_attention=True):
     """
