@@ -44,6 +44,34 @@ For running a specific test: [TO COMPLETE]
 
 See test coverage : [TO COMPLETE]
 
+## Start a training and see results
+
+To start a training : 
+
+```
+python commander.py
+```
+
+To see metrics :
+
+```
+tensorboard --logdir your_path_logs
+```
+The following line will appear
+
+```
+TensorFlow installation not found - running with reduced feature set.
+
+NOTE: Using experimental fast data loading logic. To disable, pass
+    "--load_fast=false" and report issues on GitHub. More details:
+    https://github.com/tensorflow/tensorboard/issues/4784
+
+Serving TensorBoard on localhost; to expose to the network, use a proxy or pass --bind_all
+TensorBoard 2.8.0 at http://localhost:6006/ (Press CTRL+C to quit)
+
+```
+
+Open the path 'http://localhost:6006/' in Firefox.
 
 ## Docs
 
@@ -60,6 +88,5 @@ autopep8 --in-place --aggressive --aggressive ./
 ```
 
 
-### FLAKE8
 
 
