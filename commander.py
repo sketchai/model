@@ -1,5 +1,6 @@
 import logging 
 import pytorch_lightning as pl
+import torch
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger()
@@ -19,50 +20,52 @@ import pickle
 with open(d_train.get('prep_parms_path'), 'rb') as f:
     preprocessing_params = pickle.load(f)
 
-lMax = preprocessing_params.get('lMax')
-node_feature_mapping_dim = preprocessing_params.get('node_feature_dimensions')
-edge_feature_mapping_dim = preprocessing_params.get('edge_feature_dimensions')
+# Add node_idx_map and edge_idx_map (must be placed directly into the preprocessing files)
+from src.utils.maps import NODE_IDX_MAP, EDGE_IDX_MAP, PADDING_IDX
+preprocessing_params['node_idx_map'] = NODE_IDX_MAP
+preprocessing_params['edge_idx_map'] = EDGE_IDX_MAP
+preprocessing_params['padding_idx'] = PADDING_IDX
 
-from src.dataloader.collate import collate 
-# collate all examples in one batch
-import functools
-collate_fn = functools.partial(collate, node_feature_dims=node_feature_mapping_dim,
-                                   edge_feature_dims=edge_feature_mapping_dim, lMax=lMax,
-                                   prop_max_edges_given=d_train.get('prop_max_edges_given'))
+logger.info(f'-- Load preprocessing params')
+logger.info(f'-- -- list keys: {preprocessing_params.keys()}')
+logger.info(f'-- -- preprocessing params: {preprocessing_params}')
 
-from src.dataloader.load import generate_dataset
 
-logger.info('-- Load Train Set')
-train = generate_dataset(conf=conf.get("train_data"), batch_size=d_train.get('batch_size'), collate_fn=collate_fn)
-
-logger.info('-- Load Validation Set')
-val = generate_dataset(conf=conf.get("val_data"), batch_size=d_train.get('batch_size'), collate_fn=collate_fn)
+# Create DataLoader
+from src.dataloader.generate_dataModule import SketchGraphDataModule
+data = SketchGraphDataModule(conf,preprocessing_params)
 
 
 ######## STEP 2 : Initialize a trained
-from src.models.transf_graph import GaT
-gat = GaT()
+from src.models.gat import GaT
+
+logger.info('-- Model initialization:...')
+
 # Model initialization
-model = GravTransformer(node_feature_mapping_dim,
-                            edge_feature_mapping_dim,
-                            arch['embedding_dim'],
-                            arch['n_head'],
-                            arch['num_layers'],
-                            arch['positional_encoding'],
-                            lMax)
+d_model = conf.get('model')
+
+use_cuda = not d_model.get('cpu') and torch.cuda.is_available()
+device = torch.device('cuda') if use_cuda else 'cpu'
+
+model = GaT(d_model, preprocessing_params)
 model.to(device)
 
-sketchPredictionmodel = PredictSketch(gat_model)
+from src.models.predict import PredictSketch
+sketchPredictionmodel = PredictSketch(model, conf)
+logger.info('-- Model initialization: end')
 
 # Initialize a trainer
+logger.info('-- Logger and Trainer initialization:...')
 from pytorch_lightning.loggers import TensorBoardLogger
 
-logger_conf = cong.get('logger')
-logger = TensorBoardLogger(save_dir = logger_conf.get('save_dir'), name = logger_conf.get('name'))
-trainer = pl.Trainer(gpus=1, max_epochs=3, progress_bar_refresh_rate=20, automatic_optimization=False, logger=logger)
+logger_conf = conf.get('logger')
+logger_tensorboard = TensorBoardLogger(save_dir = logger_conf.get('save_dir'), name = logger_conf.get('name'))
+trainer = pl.Trainer(gpus=1, max_epochs=3, progress_bar_refresh_rate=20, logger=logger_tensorboard )
+logger.info('-- Logger and Trainer initialization: end')
 
 # Train the model 
-trainer.fit(sketchPredictionmodel, train, val)
+logger.info('-- Model fit: ...')
+trainer.fit(sketchPredictionmodel, datamodule=data)
 
 
 ######## STEP 3 : Compute validation
