@@ -59,8 +59,8 @@ logger.info('-- Logger and Trainer initialization:...')
 from pytorch_lightning.loggers import TensorBoardLogger
 
 logger_conf = conf.get('logger')
-logger_tensorboard = TensorBoardLogger(save_dir = logger_conf.get('save_dir'), name = logger_conf.get('name'))
-trainer = pl.Trainer(gpus=1, max_epochs=3, 
+logger_tensorboard = TensorBoardLogger(save_dir = logger_conf.get('save_dir'), name = logger_conf.get('name'), log_graph=True)
+trainer = pl.Trainer(gpus=1, max_epochs=10, 
                     progress_bar_refresh_rate=20, 
                     logger=logger_tensorboard,
                     limit_train_batches=100,
@@ -71,7 +71,7 @@ logger.info('-- Logger and Trainer initialization: end')
 # Train the model 
 logger.info('-- Model fit: ...')
 trainer.fit(sketchPredictionmodel, datamodule=data)
-
+logger.info('-- Model fit: Done')
 
 ######## STEP 3 : Compute validation
 # trainer.test(test_dataloaders=test)

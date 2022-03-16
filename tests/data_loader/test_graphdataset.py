@@ -1,6 +1,7 @@
 import unittest
 import logging
 import torch
+import numpy as np
 
 
 
@@ -11,6 +12,11 @@ import sys
 sys.path.append('/home/i37181/Documents/Projets/CAO/SketchGraphs/sketchgraphs')
 
 from src.dataloader.graph_data import GraphDataset
+
+
+import sys 
+sys.path.append('/home/i37181/Documents/Projets/CAO/SketchGraphs/sketchgraphs')
+from sketchgraphs.data import flat_array
 
 class TestGraphDataset(unittest.TestCase):
 
@@ -23,3 +29,14 @@ class TestGraphDataset(unittest.TestCase):
 
         logger.debug(f'graph dataset: {graph_dataset.datasets}')
         logger.debug(f'graph dataset: {graph_dataset.weights}')
+        
+        for ex in graph_dataset:
+            logger.debug(f'element: {ex}')
+            break
+        path = 'tests/asset/dataset/example.npy'
+        data = flat_array.save_list_flat(ex)
+        np.save(path, data, allow_pickle=False)
+        ex_new = np.load(path)
+        res = flat_array.load_flat_array(path)
+        
+        logger.debug(f'element: {res[0]}')

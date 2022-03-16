@@ -5,6 +5,8 @@ import pytorch_lightning as pl
 
 from src.models.numerical_features.generator import generate_embedding
 from src.models.dense_emb import DenseSparsePreEmbedding, ConcatenateLinear
+from src.dataloader.batch_data import GraBatch
+from src.utils.example_generator import ex_generator
 
 import logging
 logging.basicConfig(level=logging.DEBUG)
@@ -38,6 +40,8 @@ class GaT(pl.LightningModule):
         super().__init__()
 
         self.init_model(d_model, d_preprocessing_params)
+
+        self.example_input_array = GraBatch(ex_generator())
 
 
     def init_model(self, d_model:Dict = {}, d_preprocessing_params: Dict = {}):
@@ -79,7 +83,7 @@ class GaT(pl.LightningModule):
             Outputs :
                       (Dict) : a dict containing the following key : edges_pos, edges_neg and type
         """
-
+        
         # Compute node and edge embedding
         node_embedding = self.node_embedding(data.node_features, data.sparse_node_features)
         edge_embedding = self.edge_embedding(data.edge_features, data.sparse_edge_features)
