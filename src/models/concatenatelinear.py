@@ -1,6 +1,10 @@
 import torch
 
 
+import logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger()
+
 class ConcatenateLinear(torch.nn.Module):
     """
         A torch nn module that concatenates several inputs and mixes them using a linear layer.
@@ -20,4 +24,6 @@ class ConcatenateLinear(torch.nn.Module):
                                        out_features=output_size)  # Apply a linear transform to the incoming data y = xA^T + b
 
     def forward(self, left: torch.tensor, right: torch.tensor) -> torch.tensor:
+        logger.debug(f'left: {left.shape}')
+        logger.debug(f'right: {right.shape}')
         return self._linear(torch.cat((left, right), dim=-1))  # concatenation on the last dimension

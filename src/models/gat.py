@@ -6,13 +6,17 @@ import pytorch_lightning as pl
 from src.models.numerical_features.generator import generate_embedding
 from src.models.dense_emb import DenseSparsePreEmbedding, ConcatenateLinear
 
+import logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger()
 
-class GaT(pl.Module):
+
+class GaT(pl.LightningModule):
     """
     The neural network. Some utilitaries are included.
     """
 
-    def __init__(self, embedding_dim: int, n_head: int, num_layers: int, d_preprocessing_params: Dict = {}):
+    def __init__(self, d_model: Dict = {}, d_preprocessing_params: Dict = {}):
         """
 
         embedding_dim (int) :  the embedding dimension used in the whole network;
@@ -32,33 +36,39 @@ class GaT(pl.Module):
         """
         super().__init__()
 
-        self.init_model(embedding_dim, n_head, num_layers, d_preprocessing_params)
-        self.d_optimizer = {'lr' : , 'scheduler_step'  : , 'scheduler_lr' : } #TODO
+        self.init_model(d_model, d_preprocessing_params)
 
-    def init_model(self, embedding_dim: int, n_head: int, num_layers: int, d_preprocessing_params: Dict = {}):
+
+    def init_model(self, d_model:Dict = {}, d_preprocessing_params: Dict = {}):
+        embedding_dim = d_model.get('embedding_dim')
         self.lMax = d_preprocessing_params.get('lMax')
         self.embedding_dim = embedding_dim
 
-        node_feature = generate_embedding(d_preprocessing_params.get('node_feature_dims'), embedding_dim)
-        self.node_embedding = DenseSparsePreEmbedding(node_feature, d_preprocessing_params.get('node_idx_map'), embedding_dim, padding_idx=d_preprocessing_params.get('padding_idx'))
+        node_feature = generate_embedding(d_preprocessing_params.get('node_feature_dimensions'), embedding_dim)
+        self.node_embedding = DenseSparsePreEmbedding(feature_embeddings= node_feature, 
+                                                        fixed_embedding_cardinality=len(d_preprocessing_params.get('node_idx_map')), 
+                                                        fixed_embedding_dim= embedding_dim, 
+                                                        padding_idx=d_preprocessing_params.get('padding_idx'))
 
-        edge_feature = generate_embedding(d_preprocessing_params.get('edge_feature_dims'), embedding_dim)
-        self.edge_embedding = DenseSparsePreEmbedding(edge_feature, d_preprocessing_params.get('edge_idx_map'), embedding_dim)
+        edge_feature = generate_embedding(d_preprocessing_params.get('edge_feature_dimensions'), embedding_dim)
+        self.edge_embedding = DenseSparsePreEmbedding(feature_embeddings=edge_feature, 
+                                                        fixed_embedding_cardinality= len(d_preprocessing_params.get('edge_idx_map')), 
+                                                        fixed_embedding_dim=embedding_dim)
 
         self.transform_edge_messages = ConcatenateLinear(embedding_dim, embedding_dim, embedding_dim)
 
         # Positional encoding
-        if do_positional_encoding:
+        if d_model.get('positional_encoding'):
             self.positional_encoding = torch.nn.Embedding(self.lMax, embedding_dim)
         else:
             self.positional_encoding = None
 
         # Instantiate
-        encoder_layer = torch.nn.TransformerEncoderLayer(d_model=embedding_dim, nhead=n_head, dim_feedforward=2 * embedding_dim)
-        self.transformer_encoder = torch.nn.TransformerEncoder(encoder_layer, num_layers=num_layers)
+        encoder_layer = torch.nn.TransformerEncoderLayer(d_model=embedding_dim, nhead=d_model.get('n_head'), dim_feedforward=2 * embedding_dim)
+        self.transformer_encoder = torch.nn.TransformerEncoder(encoder_layer, num_layers=d_model.get('num_layers'))
 
         self.prediction_edge = torch.nn.Linear(embedding_dim, 1)
-        self.prediction_type = torch.nn.Linear(embedding_dim, len(EDGE_IDX_MAP))
+        self.prediction_type = torch.nn.Linear(embedding_dim, len(d_preprocessing_params.get('edge_idx_map')))
 
     def forward(self, data) -> Dict:
         """
@@ -68,10 +78,10 @@ class GaT(pl.Module):
             Outputs :
                       (Dict) : a dict containing the following key : edges_pos, edges_neg and type
         """
-
+        logger.debug(f'In the forward loop: {data}')
         # Compute node and edge embedding
-        node_embedding = self.node_embedding(data.node_features, data.sparse_node_features)
-        edge_embedding = self.edge_embedding(data.edge_features, data.sparse_edge_features)
+        node_embedding = self.node_embedding(data.get('node_features'), data.get('sparse_node_features'))
+        edge_embedding = self.edge_embedding(data.get('edge_features'), data.get('sparse_edge_features'))
 
         # Agregate node and edge information (message passing)
         agreg = self.aggregate_by_incidence(node_embedding, data.incidences, edge_embedding)
