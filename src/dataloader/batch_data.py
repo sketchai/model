@@ -1,5 +1,8 @@
 import torch 
+import logging 
 
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger()
 
 class GraBatch:
     """
@@ -10,6 +13,8 @@ class GraBatch:
         """
         data : as returned by the collate function.
         """
+        node_ops = data.get('node_ops')
+        # logger.info(f'data: {node_ops}')
         self.l_batch = data['l_batch']
         self.node_features = data['node_features']
         self.sparse_node_features = data['sparse_node_features']
@@ -22,6 +27,20 @@ class GraBatch:
         self.src_key_padding_mask = data['src_key_padding_mask']
         self.positions = data['positions']
         self.is_given = data['is_given']
+
+
+    def __repr__(self):
+        rep = f'l_batch: {self.l_batch} \n'
+        rep = rep + f'node_features: {self.node_features} \n'
+        rep = rep + f'sparse_node_features: {self.sparse_node_features} \n'
+        rep = rep + f'incidences: {self.incidences} \n'
+        rep = rep + f'edge_features: {self.edge_features} \n'
+        rep = rep + f'sparse_edge_features: {self.sparse_edge_features} \n'
+        rep = rep + f'edges_toInf_pos: {self.edges_toInf_pos} \n'
+        rep = rep + f'edges_toInf_neg: {self.edges_toInf_neg} \n'
+        rep = rep + f'src_key_padding_mask: {self.src_key_padding_mask} \n'
+        rep = rep + f'positions: {self.positions} \n'
+        rep = rep + f'is_given: {self.is_given} \n'
 
 
 

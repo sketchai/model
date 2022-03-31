@@ -33,11 +33,16 @@ def collate(batch, node_feature_dims, edge_feature_dims, lMax, prop_max_edges_gi
     is_given = []
 
     for n, ex in enumerate(batch):
+
+        # node_features
         node_features.append(ex['node_features'])
+
+        # sparse_node_features 
         for k in node_feature_dims.keys():
             sparse_node_features[k]['index'].append(ex['sparse_node_features'][k]['index'] + n * lMax)
             sparse_node_features[k]['value'].append(ex['sparse_node_features'][k]['value'])
 
+        # is_given
         l = len(ex['i_edges_possible'])
         n_max_edges_given = min(int(prop_max_edges_given * l), l - 2)
         if l > 2:
@@ -46,6 +51,8 @@ def collate(batch, node_feature_dims, edge_feature_dims, lMax, prop_max_edges_gi
             i_given = np.array([], dtype=np.int64)
         i_given = np.concatenate([i_given, ex['i_edges_given']])
         is_given.append(i_given)
+
+
         maskCompl = np.ones(len(ex['incidences']), dtype=bool)
         maskCompl[i_given] = False
 
@@ -76,7 +83,8 @@ def collate(batch, node_feature_dims, edge_feature_dims, lMax, prop_max_edges_gi
             edge_features == EDGE_IDX_MAP.get(k, -1), as_tuple=True)[0]
         sparse_edge_features[k]['value'] = torch.vstack(sparse_edge_features[k]['value'])
         sparse_edge_features[k]['value'] = sparse_edge_features[k]['value'].repeat(2, 1)
-    if not generation:
+
+    if not generation: #if not training
         edges_toInf_pos = torch.vstack(edges_toInf_pos).contiguous()
         edges_toInf_pos_types = torch.cat(edges_toInf_pos_types).contiguous()
         edges_toInf_neg = torch.vstack(edges_toInf_neg)

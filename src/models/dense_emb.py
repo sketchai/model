@@ -49,10 +49,10 @@ class DenseSparsePreEmbedding(torch.nn.Module):
         for k, embedding_network in self.feature_embeddings.items():
 
             sf = sparse_features.get(k)
-            if sf is None or len(sf['index']) == 0:
+            if sf is None or len(sf['index']) == 0: # Si le type n'est pas présent, on continue
                 continue
 
             assert (sf['index'] < fixed_embeddings.shape[0]).all()
-            sparse_embeddings[sf['index']] = embedding_network(sf['value'])
+            sparse_embeddings[sf['index']] = embedding_network(sf['value']) # met à jour la ligne avec la valeur associée
 
         return sparse_embeddings

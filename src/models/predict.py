@@ -31,6 +31,7 @@ class PredictSketch(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         prediction = self.model(batch)
+        # logger.debug(f'Prediction: {prediction}')
         loss = GaT.loss(prediction, batch, coef_neg=self.coef_neg, weight_types=None)
         # Save loss
         self.logger.log_metrics({'train_loss': loss})

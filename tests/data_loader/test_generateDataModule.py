@@ -41,7 +41,9 @@ class TestGraphDataset(unittest.TestCase):
         self.assertTrue(len(val_dataset) > 0)
         
         for i, batch in enumerate(val_dataset):
-            logger.debug(f'{i} /{len(val_dataset)}')
+            if i > 2 :
+                break
+            logger.debug(f'batch = {batch} {i} /{len(val_dataset)}')
             # logger.debug(f'{i} batch:{batch}')
 
 # piste pour le collate function: https://www.scottcondron.com/jupyter/visualisation/audio/2020/12/02/dataloaders-samplers-collate.html
