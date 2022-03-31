@@ -1,6 +1,7 @@
 import unittest
 import logging
 import torch
+import numpy as np
 
 
 
@@ -11,6 +12,11 @@ import sys
 sys.path.append('/home/i37181/Documents/Projets/CAO/SketchGraphs/sketchgraphs')
 
 from src.dataloader.graph_data import GraphDataset
+
+
+import sys 
+sys.path.append('/home/i37181/Documents/Projets/CAO/SketchGraphs/sketchgraphs')
+from sketchgraphs.data import flat_array
 
 class TestGraphDataset(unittest.TestCase):
 
@@ -33,5 +39,4 @@ class TestGraphDataset(unittest.TestCase):
                 logger.debug(f'elt i= {i}')
                 logger.debug(f'x= {x}')
                 break
-
 
