@@ -79,7 +79,7 @@ class GaT(pl.LightningModule):
         """
             Forward function of nn
             Inputs:
-                data (torch.tensor) :
+                data (torch.tensor) :/
             Outputs :
                       (Dict) : a dict containing the following key : edges_pos, edges_neg and type
         """
@@ -103,9 +103,12 @@ class GaT(pl.LightningModule):
         edges_neg, edges_pos = data.edges_toInf_neg.cuda(), data.edges_toInf_pos.cuda()
         representation_final_edges = GaT.representation_final_edges(output_transformer, edges_neg, edges_pos)
 
-        return {"edges_pos": self.prediction_edge(representation_final_edges['edges_pos']),
-                "edges_neg": self.prediction_edge(representation_final_edges['edges_neg']),
-                "type": self.prediction_type(representation_final_edges['edges_pos'])}
+        d = {"edges_pos": self.prediction_edge(representation_final_edges['edges_pos']),
+             "edges_neg": self.prediction_edge(representation_final_edges['edges_neg']),
+             "type": self.prediction_type(representation_final_edges['edges_pos'])}
+        
+
+        return d
 
     def aggregate_by_incidence(self, node_embedding, incidence, edge_embedding):
 
