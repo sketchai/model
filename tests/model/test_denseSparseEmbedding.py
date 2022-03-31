@@ -37,20 +37,41 @@ class TestDenseSparseEmbedding(unittest.TestCase):
         # logger.info(f'--- d_prep= {d_prep}')
         graph_dataset = SketchGraphDataModule(conf, d_prep)
         dataset = graph_dataset.train_dataloader()
+        logger.debug(f'dataset size={len(dataset)}')
+        logger.debug(f'dataset.dataset: nb size={len(dataset.dataset)}')
 
         embedding_dim = 240
         node_feature = generate_embedding(d_prep.get('node_feature_dimensions'), embedding_dim)
+        logger.debug(f'node_feature: {node_feature}')
         node_embedding = DenseSparsePreEmbedding(feature_embeddings= node_feature, 
                                                         fixed_embedding_cardinality=len(d_prep.get('node_idx_map')), 
                                                         fixed_embedding_dim= embedding_dim, 
                                                         padding_idx=d_prep.get('padding_idx'))
 
+        # device = torch.device('cuda') 
 
         for i, batch in enumerate(dataset):
-            logger.info(f'Input tensor: \n')
-            logger.info(dataset)
-            output = node_embedding.forward(batch)
-            logger.debug(f'Output tensor: {output}')
+            # batch : 2 circles
+            logger.info(f'Fixe feature')
+            logger.info(f'Input tensor keys: {batch.node_features}')
+            fixed_embeddings = node_embedding.fixed_embedding(batch.node_features)
+            # output = node_embedding.forward(batch.node_features, batch.sparse_node_features)
+            logger.debug(f'Output tensor: {fixed_embeddings}')
+
+            logger.info(f'Sparse features: { batch.sparse_node_features}')
+            output = node_embedding.generate_sparse_embeddings(fixed_embeddings, batch.sparse_node_features)
+            
+            # logger.debug(f'Output tensor: {output}')
+            logger.debug(f'Output tensor: {output.sum()}')
+            circle_1 = output[1]
+            logger.debug(f'Circle 1: {circle_1.sum()}')
+            self.assertEqual(len(circle_1), embedding_dim)
+            self.assertTrue(abs(circle_1.sum()) > 0.0)
+
+            circle_2 = output[3]
+            logger.debug(f'Circle 2: {circle_2.sum()}')
+            self.assertTrue(abs(circle_2.sum()) > 0.0)
+
 
             break
-        # TODO : Tester cette couche pour verifier la forme de la matrice (notamment, est-elle totalement écrasée par la couche d'avant ? oui/non)
+        # TODO : Bug au niveau du feature embedding

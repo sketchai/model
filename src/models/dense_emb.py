@@ -30,6 +30,7 @@ class DenseSparsePreEmbedding(torch.nn.Module):
         sparse_features: dictionary {primitive/constraint: {'index': tensor, 'value': tensor}}, the discretized parameters of the primitives/constraints.
         """
 
+        logger.debug(f'fixed_features: {fixed_features}')
         fixed_embeddings = self.fixed_embedding(fixed_features.cuda())
         sparse_embeddings = self.generate_sparse_embeddings(fixed_embeddings, sparse_features)
 
@@ -48,7 +49,9 @@ class DenseSparsePreEmbedding(torch.nn.Module):
         # Filter on the sparse embedding matrix
         for k, embedding_network in self.feature_embeddings.items():
 
+            
             sf = sparse_features.get(k)
+
             if sf is None or len(sf['index']) == 0: # Si le type n'est pas présent, on continue
                 continue
 

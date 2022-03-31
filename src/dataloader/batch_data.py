@@ -13,8 +13,10 @@ class GraBatch:
         """
         data : as returned by the collate function.
         """
+        # logger.info(f'data: {data}')
+
         node_ops = data.get('node_ops')
-        # logger.info(f'data: {node_ops}')
+
         self.l_batch = data['l_batch']
         self.node_features = data['node_features']
         self.sparse_node_features = data['sparse_node_features']
@@ -41,6 +43,7 @@ class GraBatch:
         rep = rep + f'src_key_padding_mask: {self.src_key_padding_mask} \n'
         rep = rep + f'positions: {self.positions} \n'
         rep = rep + f'is_given: {self.is_given} \n'
+        return rep
 
 
 

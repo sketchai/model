@@ -22,9 +22,9 @@ def collate(batch, node_feature_dims, edge_feature_dims, lMax, prop_max_edges_gi
     mask_attention: bool, to generate a mask on the padding nodes for the attention mecanism.
     """
     node_features = []
-    sparse_node_features = {k: {'index': [], 'value': []} for k in node_feature_dims.keys()}
+    sparse_node_features = {k.name: {'index': [], 'value': []} for k in node_feature_dims.keys()}
     edge_features = []
-    sparse_edge_features = {k: {'index': [], 'value': []} for k in edge_feature_dims.keys()}
+    sparse_edge_features = {k.name: {'index': [], 'value': []} for k in edge_feature_dims.keys()}
     incidences = []
     edges_toInf_pos = []
     edges_toInf_pos_types = []
@@ -39,8 +39,8 @@ def collate(batch, node_feature_dims, edge_feature_dims, lMax, prop_max_edges_gi
 
         # sparse_node_features 
         for k in node_feature_dims.keys():
-            sparse_node_features[k]['index'].append(ex['sparse_node_features'][k]['index'] + n * lMax)
-            sparse_node_features[k]['value'].append(ex['sparse_node_features'][k]['value'])
+            sparse_node_features[k.name]['index'].append(ex['sparse_node_features'][k]['index'] + n * lMax)
+            sparse_node_features[k.name]['value'].append(ex['sparse_node_features'][k]['value'])
 
         # is_given
         l = len(ex['i_edges_possible'])
@@ -63,7 +63,7 @@ def collate(batch, node_feature_dims, edge_feature_dims, lMax, prop_max_edges_gi
         for k in edge_feature_dims.keys():
             i_given_sparse_features = torch.nonzero(i_given - ex['sparse_edge_features'][k]['index'].unsqueeze(1) == 0,
                                                     as_tuple=True)[0]  # indices of ex['sparse_edge_features']['index'] that are in i_given
-            sparse_edge_features[k]['value'].append(ex['sparse_edge_features'][k]['value'][i_given_sparse_features])
+            sparse_edge_features[k.name]['value'].append(ex['sparse_edge_features'][k]['value'][i_given_sparse_features])
         edges_toInf_pos.append(ex['incidences'][maskCompl] + n * lMax)
         edges_toInf_pos_types.append(ex['edge_features'][maskCompl])
 
@@ -72,8 +72,8 @@ def collate(batch, node_feature_dims, edge_feature_dims, lMax, prop_max_edges_gi
 
     node_features = torch.cat(node_features)
     for k in node_feature_dims.keys():
-        sparse_node_features[k]['index'] = torch.cat(sparse_node_features[k]['index'])
-        sparse_node_features[k]['value'] = torch.vstack(sparse_node_features[k]['value'])
+        sparse_node_features[k.name]['index'] = torch.cat(sparse_node_features[k.name]['index'])
+        sparse_node_features[k.name]['value'] = torch.vstack(sparse_node_features[k.name]['value'])
     incidences = torch.vstack(incidences).T.contiguous()
     incidences = torch.cat((incidences, torch.flip(incidences, [0])), dim=1)  # non-oriented graph, symmetrize
     edge_features = torch.cat(edge_features)

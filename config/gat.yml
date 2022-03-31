@@ -5,20 +5,20 @@ logger:
 
 train_data: # Train data related parameters
   num_workers: 1
-  path_data: "tests/asset/dataset/sg_test_final.npy" # "sg_t16_validation_final.npy"  #folder or file name (should end with .npy)
-  path_weights: "tests/asset/dataset/sg_test_weights.npy"  # "sg_t16_validation_weights.npy" # 
+  path_data: "tests/asset/dataset/val/sg_validation_final.npy" # "sg_t16_validation_final.npy"  #folder or file name (should end with .npy)
+  path_weights: "tests/asset/dataset/val/sg_validation_weights.npy"  # "sg_t16_validation_weights.npy" # 
   n_slice: 9 #None
 
 val_data: # Test data related parameters
     num_workers: 1
     num_batch_eval: 20
-    path_data: "tests/asset/dataset/sg_test_final.npy"
-    path_weights: "tests/asset/dataset/sg_test_weights.npy"
+    path_data: "tests/asset/dataset/val/sg_validation_final.npy"
+    path_weights: "tests/asset/dataset/val/sg_validation_weights.npy"
     coef_neg: 1.
 
 train:
     cpu: False
-    prep_parms_path: "tests/asset/dataset/preprocessing_params.pkl" #"preprocessing_params.pkl" # 
+    prep_parms_path: "tests/asset/dataset/val/preprocessing_params.pkl" #"preprocessing_params.pkl" # 
     batch_size: 8
     prop_max_edges_given: 0.1
 

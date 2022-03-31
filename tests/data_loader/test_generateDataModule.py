@@ -12,11 +12,7 @@ sys.path.append('/home/i37181/Documents/Projets/CAO/SketchGraphs/sketchgraphs')
 
 from src.dataloader.generate_dataModule import SketchGraphDataModule
 
-class TestGraphDataset(unittest.TestCase):
-
-    # @classmethod
-    # def setUp(self):
-    #     self.concatenate = ConcatenateLinear(left_size=10, right_size=1, output_size=5)
+class TestSketchGraphDataModule(unittest.TestCase):
 
     def test_creation(self):
 

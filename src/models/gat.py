@@ -41,7 +41,7 @@ class GaT(pl.LightningModule):
 
         self.init_model(d_model, d_preprocessing_params)
 
-        self.example_input_array = GraBatch(ex_generator())
+        # self.example_input_array = GraBatch(ex_generator())
 
 
     def init_model(self, d_model:Dict = {}, d_preprocessing_params: Dict = {}):
