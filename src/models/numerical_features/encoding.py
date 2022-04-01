@@ -25,5 +25,4 @@ class NumericalFeatureEncoding(torch.nn.Module):
         self.embeddings = torch.nn.Embedding(sum(feature_dims), embedding_dim, sparse=False)
 
     def forward(self, features):
-
-        return self.embeddings(features + self.feature_offsets)
+        return self.embeddings(features.to(self.feature_offsets.device) + self.feature_offsets)

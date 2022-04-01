@@ -85,16 +85,16 @@ class GaT(pl.LightningModule):
         """
         
         # Compute node and edge embedding
-        node_embedding = self.node_embedding(data.node_features, data.sparse_node_features)
-        edge_embedding = self.edge_embedding(data.edge_features, data.sparse_edge_features)
+        node_embedding = self.node_embedding(data.node_features.to(self.device), data.sparse_node_features)
+        edge_embedding = self.edge_embedding(data.edge_features.to(self.device), data.sparse_edge_features)
 
         # Agregate node and edge information (message passing)
-        agreg = self.aggregate_by_incidence(node_embedding, data.incidences, edge_embedding)
+        agreg = self.aggregate_by_incidence(node_embedding, data.incidences.to(self.device), edge_embedding)
         input_embedding = node_embedding + agreg
 
         # Update input with positional encoding
         if self.positional_encoding is not None:
-            input_embedding += self.positional_encoding(data.positions.tile(data.l_batch).cuda())
+            input_embedding += self.positional_encoding(data.positions.tile(data.l_batch).to(self.device))
 
         input_embedding = input_embedding.view((data.l_batch, self.lMax, self.embedding_dim))
         output_transformer = torch.transpose(self.transformer_encoder(torch.transpose(input_embedding, 0, 1),
@@ -112,7 +112,7 @@ class GaT(pl.LightningModule):
 
     def aggregate_by_incidence(self, node_embedding, incidence, edge_embedding):
 
-        edge_messages = node_embedding.index_select(0, incidence[1].cuda())
+        edge_messages = node_embedding.index_select(0, incidence[1])
         edge_messages = self.transform_edge_messages(edge_messages, edge_embedding)
 
         output = node_embedding.new_zeros([node_embedding.shape[0]] + list(edge_messages.shape[1:]))
@@ -126,10 +126,11 @@ class GaT(pl.LightningModule):
             'edges_pos': torch.index_select(output, 0, edges_pos[:, 0]) * torch.index_select(output, 0, edges_pos[:, 1])}
 
     def loss(prediction, data, coef_neg=1., weight_types=None):
+        device = data.edges_toInf_pos_types.device
         loss_edge_pos = torch.mean(torch.nn.functional.softplus(-prediction['edges_pos']))
         loss_edge_neg = torch.mean(torch.nn.functional.softplus(prediction['edges_neg']))
 
-        loss_type = torch.nn.functional.cross_entropy(prediction['type'], data.edges_toInf_pos_types.cuda(), weight=weight_types)
+        loss_type = torch.nn.functional.cross_entropy(prediction['type'].to(device), data.edges_toInf_pos_types, weight=weight_types)
 
         return loss_edge_pos + coef_neg * loss_edge_neg + loss_type
 
@@ -137,18 +138,19 @@ class GaT(pl.LightningModule):
         """
         To assess the precision and the recall of the neural network.
         """
+        device = data.edges_toInf_pos_types.device
         with torch.no_grad():
             n_edges_pos_predicted_pos = torch.sum(prediction['edges_pos'] > 0).item()
             n_edges_predicted_pos = n_edges_pos_predicted_pos + torch.sum(prediction['edges_neg'] > 0).item()
             n_edges_pos = len(prediction['edges_pos'])
 
-            types_evaluated_i = torch.arange(len(EDGE_IDX_MAP)).unsqueeze(0).to(data.edges_toInf_pos_types.device).cuda()
+            types_evaluated_i = torch.arange(len(EDGE_IDX_MAP)).unsqueeze(0).to(device)
             data.edges_toInf_pos_types = data.edges_toInf_pos_types.unsqueeze(1)
 
-            i_predicted = torch.argmax(prediction['type'], dim=-1, keepdim=True)
-            n_edges_i_predicted_i = torch.count_nonzero((i_predicted == types_evaluated_i) & (i_predicted == data.edges_toInf_pos_types.cuda()), axis=0)
+            i_predicted = torch.argmax(prediction['type'].to(device), dim=-1, keepdim=True)
+            n_edges_i_predicted_i = torch.count_nonzero((i_predicted == types_evaluated_i) & (i_predicted.to(device) == data.edges_toInf_pos_types), axis=0)
             n_edges_predicted_i = torch.count_nonzero(i_predicted == types_evaluated_i, axis=0)
-            n_edges_i = torch.count_nonzero(data.edges_toInf_pos_types.cuda() == types_evaluated_i, axis=0)
+            n_edges_i = torch.count_nonzero(data.edges_toInf_pos_types == types_evaluated_i, axis=0)
 
         return ([n_edges_pos_predicted_pos, n_edges_predicted_pos, n_edges_pos],
                 [n_edges_i_predicted_i.tolist(), n_edges_predicted_i.tolist(), n_edges_i.tolist()])
