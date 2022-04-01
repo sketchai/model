@@ -73,6 +73,15 @@ TensorBoard 2.8.0 at http://localhost:6006/ (Press CTRL+C to quit)
 
 Open the path 'http://localhost:6006/' in Firefox.
 
+
+## Run on HPC
+
+Run on HPC (edit the .sh file to change dataset):
+
+```
+sbatch scripts/commander.sh
+```
+
 ## Docs
 
 - [More about the numerical features generator](docs/models/numericalFeature.md): the numerical features generator allows to convert and harmonize information. In the specific context of sketches, it converts and harmonizes all the parameters characterizing the nodes (primitives) or the edges (constraints) of a sketch.

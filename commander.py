@@ -1,17 +1,28 @@
 import logging 
 import pytorch_lightning as pl
 import torch
+import os 
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger()
 
 #### SG path
-import sys 
-sys.path.append('/home/i37181/Documents/Projets/CAO/SketchGraphs/sketchgraphs')
+import sys
+CAO_DIR = '/home/i37181/CAO_ML/git_depot/sketch_graph'
+sys.path.append(os.path.join(CAO_DIR, 'sketchgraphs'))
 
 ######## STEP 1 : Import Datasets
 from src.utils.to_dict import yaml_to_dict
 conf = yaml_to_dict('config/gat.yml')
+
+# update path
+main_dir = conf.get('experiment').get('dir')
+conf['logger']['save_dir'] = os.path.join(main_dir, conf['logger']['save_dir'])
+
+conf['train']['prep_parms_path'] = os.path.join(main_dir, conf['train']['file_prep_parms'])
+for x in ['data', 'weights']:
+    conf['train_data'][f'path_{x}'] = os.path.join(main_dir, conf['train_data'][f'file_{x}'])    
+    conf['val_data'][f'path_{x}'] = os.path.join(main_dir, conf['val_data'][f'file_{x}'])   
 
 
 # Initialiaze parameters

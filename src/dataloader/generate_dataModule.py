@@ -12,6 +12,8 @@ logger = logging.getLogger()
 
 class SketchGraphDataModule(pl.LightningDataModule):
     def __init__(self,conf: Dict = None, preprocessing_params:Dict = {}):
+        super().__init__()
+        self.prepare_data_per_node = True
         
         self.batch_size = conf.get('train').get('batch_size')
         self.d_train = conf.get('train_data')
