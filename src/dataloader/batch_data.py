@@ -13,21 +13,24 @@ class GraBatch:
         """
         data : as returned by the collate function.
         """
-        node_ops = data.get('node_ops')
-        # logger.info(f'data: {node_ops}')
-        self.l_batch = data['l_batch']
-        self.node_features = data['node_features']
-        self.sparse_node_features = data['sparse_node_features']
-        self.incidences = data['incidences']
-        self.edge_features = data['edge_features']
-        self.sparse_edge_features = data['sparse_edge_features']
-        self.edges_toInf_pos = data['edges_toInf_pos']
-        self.edges_toInf_pos_types = data['edges_toInf_pos_types']
-        self.edges_toInf_neg = data['edges_toInf_neg']
-        self.src_key_padding_mask = data['src_key_padding_mask']
-        self.positions = data['positions']
-        self.is_given = data['is_given']
+        # logger.info(f'data: {data}')
 
+        
+
+        self.l_batch = data.get('l_batch')
+        self.node_features = data.get('node_features')
+        self.sparse_node_features = data.get('sparse_node_features')
+        self.incidences = data.get('incidences')
+        self.edge_features = data.get('edge_features')
+        self.sparse_edge_features = data.get('sparse_edge_features')
+        self.edges_toInf_pos = data.get('edges_toInf_pos')
+        self.edges_toInf_pos_types = data.get('edges_toInf_pos_types')
+        self.edges_toInf_neg = data.get('edges_toInf_neg')
+        self.src_key_padding_mask = data.get('src_key_padding_mask')
+        self.positions = data.get('positions')
+        self.is_given = data.get('given_index_edges')
+
+        
 
     def __repr__(self):
         rep = f'l_batch: {self.l_batch} \n'
@@ -41,11 +44,13 @@ class GraBatch:
         rep = rep + f'src_key_padding_mask: {self.src_key_padding_mask} \n'
         rep = rep + f'positions: {self.positions} \n'
         rep = rep + f'is_given: {self.is_given} \n'
+        return rep
 
 
 
     # custom memory pinning method on custom type
     def pin_memory(self):
+
         self.node_features.pin_memory()
         for k in self.sparse_node_features.keys():
             self.sparse_node_features[k]['index'].pin_memory()
@@ -61,10 +66,12 @@ class GraBatch:
         if self.src_key_padding_mask is not None:
             self.src_key_padding_mask.pin_memory()
         self.positions.pin_memory()
+
         return self
 
     # custom memory loading method on custom type
     def load_cuda_async(self, device):
+
         if device.type == "cpu":
             return None
         self.node_features = self.node_features.to(device=device, non_blocking=False)

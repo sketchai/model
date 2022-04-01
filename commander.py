@@ -66,6 +66,7 @@ trainer = pl.Trainer(gpus=1, max_epochs=10,
                     limit_train_batches=100,
                     limit_val_batches=100
                     )
+
 logger.info('-- Logger and Trainer initialization: end')
 
 # Train the model 

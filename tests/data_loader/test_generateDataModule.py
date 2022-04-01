@@ -12,11 +12,7 @@ sys.path.append('/home/i37181/Documents/Projets/CAO/SketchGraphs/sketchgraphs')
 
 from src.dataloader.generate_dataModule import SketchGraphDataModule
 
-class TestGraphDataset(unittest.TestCase):
-
-    # @classmethod
-    # def setUp(self):
-    #     self.concatenate = ConcatenateLinear(left_size=10, right_size=1, output_size=5)
+class TestSketchGraphDataModule(unittest.TestCase):
 
     def test_creation(self):
 
@@ -40,7 +36,9 @@ class TestGraphDataset(unittest.TestCase):
         # logger.debug(f'val_dataset: {val_dataset}')
         self.assertTrue(len(val_dataset) > 0)
         
+        logger.debug(f'HERE')
         for i, batch in enumerate(val_dataset):
+            logger.debug(f'HERE')
             if i > 2 :
                 break
             logger.debug(f'batch = {batch} {i} /{len(val_dataset)}')
