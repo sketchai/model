@@ -1,6 +1,6 @@
 import unittest
 import logging
-import torch
+import os
 import pickle
 from src.utils.to_dict import yaml_to_dict
 
@@ -17,6 +17,15 @@ class TestSketchGraphDataModule(unittest.TestCase):
     def test_creation(self):
 
         conf = yaml_to_dict('config/gat.yml')
+        # update path
+        main_dir = conf.get('experiment').get('dir')
+        conf['logger']['save_dir'] = os.path.join(main_dir, conf['logger']['save_dir'])
+
+        conf['train']['prep_parms_path'] = os.path.join(main_dir, conf['train']['file_prep_parms'])
+        for x in ['data', 'weights']:
+            conf['train_data'][f'path_{x}'] = os.path.join(main_dir, conf['train_data'][f'file_{x}'])    
+            conf['val_data'][f'path_{x}'] = os.path.join(main_dir, conf['val_data'][f'file_{x}'])   
+
         d_train = conf.get('train')
         with open(d_train.get('prep_parms_path'), 'rb') as f:
             d_prep = pickle.load(f)
