@@ -17,7 +17,7 @@ class TestSketchGraphDataModule(unittest.TestCase):
     def test_creation(self):
 
         conf = yaml_to_dict('config/gat.yml')
-        # update path
+        # update main path
         main_dir = conf.get('experiment').get('dir')
         conf['logger']['save_dir'] = os.path.join(main_dir, conf['logger']['save_dir'])
 
