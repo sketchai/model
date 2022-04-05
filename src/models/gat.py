@@ -96,7 +96,7 @@ class GaT(pl.LightningModule):
         if self.positional_encoding is not None:
             input_embedding += self.positional_encoding(data.positions.tile(data.l_batch).to(self.device))
 
-        input_embedding = input_embedding.view((data.l_batch, self.lMax, self.embedding_dim))
+        input_embedding = input_embedding.view((data.l_batch, self.lMax, self.embedding_dim)) # reshape
         output_transformer = torch.transpose(self.transformer_encoder(torch.transpose(input_embedding, 0, 1),
                                                                       src_key_padding_mask=data.src_key_padding_mask.cuda()), 0, 1)  # Apply Transformer
 
@@ -112,11 +112,16 @@ class GaT(pl.LightningModule):
 
     def aggregate_by_incidence(self, node_embedding, incidence, edge_embedding):
 
+        # Select the node embedding of all the nodes that exchange messages
         edge_messages = node_embedding.index_select(0, incidence[1])
+
+        # Create message : concatenate lineare on each node (to check)
         edge_messages = self.transform_edge_messages(edge_messages, edge_embedding)
 
+
+        # Create a tensor of size node_embedding.shape[0] times list(edge_messages.shape[1:])
         output = node_embedding.new_zeros([node_embedding.shape[0]] + list(edge_messages.shape[1:]))
-        output.index_add_(0, incidence[0].cuda(), edge_messages.cuda())
+        output.index_add_(0, incidence[0].cuda(), edge_messages.cuda()) # sum for each node on incidence[0]
         return output
 
     def representation_final_edges(output, edges_neg, edges_pos):
