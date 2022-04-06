@@ -80,7 +80,7 @@ d_prep['padding_idx'] = PADDING_IDX
 from src.dataloader.generate_dataModule import SketchGraphDataModule
 
 graph_dataset = SketchGraphDataModule(conf, d_prep)
-dataset = graph_dataset.train_dataloader()
+dataset = graph_dataset.val_dataloader()
 logger.debug(f'dataset size={len(dataset)}')
 logger.debug(f'dataset.dataset: nb size={len(dataset.dataset)}')
 
@@ -92,6 +92,8 @@ from sketchgraphs.data import sequence
 with torch.no_grad():
     for i, batch in enumerate(dataset):
         logger.info(f'batch: {batch.node_features[:10]}')
+        logger.info(f'edges_toInf_pos: {batch.edges_toInf_pos}')
+        logger.info(f'is_given: {batch.is_given}')
         prediction = model(batch)
     
         probs_edge = torch.sigmoid(prediction['edges_pos']).cpu().numpy()[:,0]
