@@ -19,6 +19,6 @@ def generate_dataset(conf: Dict, batch_size:int, collate_fn:object):
     return torch.utils.data.DataLoader(
                 ds,
                 collate_fn=collate_fn,
-#               batch_sampler=batch_sampler,
+                batch_sampler=batch_sampler,
                 pin_memory=True,
                 num_workers=conf.get('num_workers'))
