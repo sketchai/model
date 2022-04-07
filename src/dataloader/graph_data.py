@@ -60,7 +60,7 @@ class GraphDataset(torch.utils.data.Dataset):
         self.datasets = load_binary_file(path_seq, convert_tensor=False, data_string= 'final')
         self.cumulative_sizes = self.cumsum(self.datasets)
         logger.debug('Load weights')
-        self.weights = load_binary_file(path_weights, convert_tensor=False, data_string= 'weights')
+        self.weights = load_binary_file(path_weights, convert_tensor=True, data_string= 'weights')
         if isinstance(self.weights, list):
             self.weights = torch.cat(self.weights)
 
