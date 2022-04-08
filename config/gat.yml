@@ -1,5 +1,5 @@
 experiment:
-  dir: /home/i37181/CAO_ML/git_depot/sketch_graph/modelrnn_gat/tests/asset/val
+  dir: /home/i37181/Documents/Projets/CAO/SketchGraphs/modelrnn_gat/tests/asset/dataset/val
 
 logger:
   save_dir : 'experiment/results'
@@ -9,7 +9,7 @@ train_data: # Train data related parameters
   num_workers: 1
   file_data: "sg_validation_final.npy" # "sg_t16_validation_final.npy"  #folder or file name (should end with .npy)
   file_weights: "sg_validation_weights.npy"  # "sg_t16_validation_weights.npy" # 
-  n_slice: 9 #None
+
 
 val_data: # Test data related parameters
     num_workers: 1

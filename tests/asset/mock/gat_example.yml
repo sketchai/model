@@ -7,7 +7,7 @@ train_data: # Train data related parameters
   num_workers: 1
   path_data: "tests/asset/dataset/mini_example/mini_final.npy" # "sg_t16_validation_final.npy"  #folder or file name (should end with .npy)
   path_weights: "tests/asset/dataset/mini_example/mini_weights.npy"  # "sg_t16_validation_weights.npy" # 
-  n_slice: 1 #None
+
 
 val_data: # Test data related parameters
     num_workers: 1

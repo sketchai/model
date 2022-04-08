@@ -6,10 +6,7 @@ import os
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger()
 
-#### SG path
-import sys
-CAO_DIR = '/home/i37181/Documents/Projets/CAO/SketchGraphs'
-sys.path.append(os.path.join(CAO_DIR, 'sketchgraphs'))
+
 
 ######## STEP 1 : Import Datasets
 from src.utils.to_dict import yaml_to_dict
@@ -30,12 +27,6 @@ d_train = conf.get('train')
 import pickle
 with open(d_train.get('prep_parms_path'), 'rb') as f:
     preprocessing_params = pickle.load(f)
-
-# Add node_idx_map and edge_idx_map (must be placed directly into the preprocessing files)
-from src.utils.maps import NODE_IDX_MAP, EDGE_IDX_MAP, PADDING_IDX
-preprocessing_params['node_idx_map'] = NODE_IDX_MAP
-preprocessing_params['edge_idx_map'] = EDGE_IDX_MAP
-preprocessing_params['padding_idx'] = PADDING_IDX
 
 logger.info(f'-- Load preprocessing params')
 logger.info(f'-- -- list keys: {preprocessing_params.keys()}')
@@ -62,6 +53,7 @@ model = GaT(d_model, preprocessing_params)
 model.to(device)
 
 from src.models.predict import PredictSketch
+conf['edge_idx_map'] = preprocessing_params.get('edge_idx_map')
 sketchPredictionmodel = PredictSketch(model, conf)
 logger.info('-- Model initialization: end')
 
@@ -79,7 +71,7 @@ checkpoint_callback = ModelCheckpoint(monitor='val_loss',
                                         filename='gat-{epoch:02d}-{val_loss:.2f}',
                                         mode="max",
                                         save_weights_only=True)
-trainer = pl.Trainer(gpus=1, max_epochs=2, 
+trainer = pl.Trainer(gpus=1, max_epochs=20, 
                     progress_bar_refresh_rate=20, 
                     logger=logger_tensorboard,
                     limit_train_batches=100,
