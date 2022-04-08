@@ -55,6 +55,10 @@ class PredictSketch(pl.LightningModule):
 
             x = perfs[1]
             self.log('metric_to_track',loss, batch_size = batch.l_batch)
+            self.log('val_loss', loss, batch_size = batch.l_batch)
+            self.log('val_perf_edge.n_edges_pos_predicted_pos', perfs[0][0],batch_size = batch.l_batch)
+            self.log('val_perf_edge.n_edges_predicted_pos', perfs[0][1],batch_size = batch.l_batch)
+            self.log('val_perf_edge.n_edges_pos',perfs[0][2], batch_size = batch.l_batch)
             # logger.debug(f'val_perf_type {x}')
 
 
