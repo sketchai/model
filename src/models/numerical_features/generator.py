@@ -20,6 +20,6 @@ def generate_embedding(d_features_dims: Dict = {}, embedding_dim: int = None) ->
     """
     d_embedding = {}
     for k, elt in d_features_dims.items():
-        d_embedding[k.name] = torch.nn.Sequential(NumericalFeatureEncoding(elt.values(), embedding_dim),
+        d_embedding[k] = torch.nn.Sequential(NumericalFeatureEncoding(elt.values(), embedding_dim),
                                                   NumericalFeaturesEmbedding())
     return d_embedding

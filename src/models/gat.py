@@ -12,7 +12,6 @@ import logging
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger()
 
-from src.utils.maps import NODE_IDX_MAP, EDGE_IDX_MAP, PADDING_IDX
 
 class GaT(pl.LightningModule):
     """
@@ -139,23 +138,29 @@ class GaT(pl.LightningModule):
 
         return loss_edge_pos + coef_neg * loss_edge_neg + loss_type
 
-    def performances(prediction, data):
+    def performances(prediction, data, edge_idx_map):
         """
         To assess the precision and the recall of the neural network.
         """
         device = data.edges_toInf_pos_types.device
+
         with torch.no_grad():
             n_edges_pos_predicted_pos = torch.sum(prediction['edges_pos'] > 0).item()
             n_edges_predicted_pos = n_edges_pos_predicted_pos + torch.sum(prediction['edges_neg'] > 0).item()
             n_edges_pos = len(prediction['edges_pos'])
 
-            types_evaluated_i = torch.arange(len(EDGE_IDX_MAP)).unsqueeze(0).to(device)
+            types_evaluated_i = torch.arange(len(edge_idx_map)).unsqueeze(0).to(device)
             data.edges_toInf_pos_types = data.edges_toInf_pos_types.unsqueeze(1)
 
-            i_predicted = torch.argmax(prediction['type'].to(device), dim=-1, keepdim=True)
-            n_edges_i_predicted_i = torch.count_nonzero((i_predicted == types_evaluated_i) & (i_predicted.to(device) == data.edges_toInf_pos_types), axis=0)
-            n_edges_predicted_i = torch.count_nonzero(i_predicted == types_evaluated_i, axis=0)
-            n_edges_i = torch.count_nonzero(data.edges_toInf_pos_types == types_evaluated_i, axis=0)
+            if len(prediction.get('type')) != 0 :
+                i_predicted = torch.argmax(prediction['type'].to(device), dim=-1, keepdim=True)
+                n_edges_i_predicted_i = torch.count_nonzero((i_predicted == types_evaluated_i) & (i_predicted.to(device) == data.edges_toInf_pos_types), axis=0)
+                n_edges_predicted_i = torch.count_nonzero(i_predicted == types_evaluated_i, axis=0)
+                n_edges_i = torch.count_nonzero(data.edges_toInf_pos_types == types_evaluated_i, axis=0)
+            else : # Cas ou il n'y as pas de contraintes predites
+                n_edges_i = torch.tensor([])
+                n_edges_predicted_i = torch.tensor([])
+                n_edges_i_predicted_i = torch.tensor([])
 
         return ([n_edges_pos_predicted_pos, n_edges_predicted_pos, n_edges_pos],
                 [n_edges_i_predicted_i.tolist(), n_edges_predicted_i.tolist(), n_edges_i.tolist()])

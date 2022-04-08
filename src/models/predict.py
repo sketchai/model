@@ -1,8 +1,7 @@
-import numpy as np
-import torch
 from typing import Dict
 import pytorch_lightning as pl
 import logging
+import torch
 
 from src.models.gat import GaT
 
@@ -17,9 +16,8 @@ class PredictSketch(pl.LightningModule):
 
         d_validation = conf.get('val_data')
         self.coef_neg = d_validation.get('coef_neg')
-
-        
-
+        self.edge_idx_map = conf.get('edge_idx_map')
+    
 
     def configure_optimizers(self):
         adam_optimizer = torch.optim.Adam(self.model.parameters(), lr=self.d_optimizer.get('lr'))
@@ -31,10 +29,10 @@ class PredictSketch(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         prediction = self.model(batch)
-        # logger.debug(f'Prediction: {prediction}')
+
         loss = GaT.loss(prediction, batch, coef_neg=self.coef_neg, weight_types=None)
         # Save loss
-        self.logger.log_metrics({'train_loss': loss})
+        self.log('train_loss', loss, batch_size = batch.l_batch)
         return loss 
 
 
@@ -45,21 +43,14 @@ class PredictSketch(pl.LightningModule):
         with torch.no_grad():
             prediction = self.model(batch)
             loss = GaT.loss(prediction, batch, coef_neg=self.coef_neg, weight_types=None).item()
-            perfs = GaT.performances(prediction, batch)
+            perfs = GaT.performances(prediction, batch, self.edge_idx_map)
 
-            # Save loss
-            self.logger.agg_and_log_metrics({'val_loss': loss,
-                                     'val_perf_edge.n_edges_pos_predicted_pos': perfs[0][0],
-                                     'val_perf_edge.n_edges_predicted_pos': perfs[0][1],
-                                     'val_perf_edge.n_edges_pos': perfs[0][2]})
-
-            x = perfs[1]
             self.log('metric_to_track',loss, batch_size = batch.l_batch)
             self.log('val_loss', loss, batch_size = batch.l_batch)
             self.log('val_perf_edge.n_edges_pos_predicted_pos', perfs[0][0],batch_size = batch.l_batch)
             self.log('val_perf_edge.n_edges_predicted_pos', perfs[0][1],batch_size = batch.l_batch)
-            self.log('val_perf_edge.n_edges_pos',perfs[0][2], batch_size = batch.l_batch)
-            # logger.debug(f'val_perf_type {x}')
+            self.log('val_nb_edges_pos',perfs[0][2], batch_size = batch.l_batch)
+
 
 
 

@@ -5,7 +5,6 @@ import enum
 
 from src.models.numerical_features.generator import generate_embedding
 from src.models.numerical_features.encoding import NumericalFeatureEncoding
-from tests.asset.mock.mock_datalib import MockConstraintType
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger()
@@ -16,12 +15,12 @@ class TestNumericalFeatures(unittest.TestCase):
     @classmethod
     def setUp(self):
         self.n_bins = 50
-        self.d_features_dims = {MockConstraintType.Angle: {'aligned': 3, 'clockwise': 3, 'angle': self.n_bins},  # example for Angle
-                                MockConstraintType.Diameter: {'length': self.n_bins}  # Diameter
+        self.d_features_dims = {'Angle': {'aligned': 3, 'clockwise': 3, 'angle': self.n_bins},  # example for Angle
+                                'Diameter': {'length': self.n_bins}  # Diameter
                                 }
 
     def test_numerical_feature_encoding(self):
-        l_values = self.d_features_dims.get(MockConstraintType.Angle).values()
+        l_values = self.d_features_dims.get('Angle').values()
         self.assertListEqual(list(l_values), [3, 3, self.n_bins])
 
         feature_encoder = NumericalFeatureEncoding(feature_dims=l_values, embedding_dim=4)
