@@ -8,13 +8,13 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger()
 
 RNG = np.random.default_rng()
-from src.utils.maps import NODE_IDX_MAP, EDGE_IDX_MAP, PADDING_IDX
+
 
 def collect_batch(batch, node_elements, edge_elements, lMax, prop_max_edges_given):
     batch_data = lambda : None
     batch_data.node_features = []
-    batch_data.sparse_node_features = {k.name: {'index': [], 'value': []} for k in node_elements}
-    batch_data.sparse_edge_features = {k.name: {'index': [], 'value': []} for k in edge_elements}
+    batch_data.sparse_node_features = {k: {'index': [], 'value': []} for k in node_elements}
+    batch_data.sparse_edge_features = {k: {'index': [], 'value': []} for k in edge_elements}
     batch_data.incidences = []
     batch_data.edges_toInf_pos = []
     batch_data.edge_features = []
@@ -35,8 +35,8 @@ def collect_batch(batch, node_elements, edge_elements, lMax, prop_max_edges_give
 
         # sparse_node_features 
         for k in node_elements :
-            batch_data.sparse_node_features[k.name]['index'].append(ex['sparse_node_features'][k]['index'] + shift) # shift ?
-            batch_data.sparse_node_features[k.name]['value'].append(ex['sparse_node_features'][k]['value'])
+            batch_data.sparse_node_features[k]['index'].append(ex['sparse_node_features'][k]['index'] + shift) # shift ?
+            batch_data.sparse_node_features[k]['value'].append(ex['sparse_node_features'][k]['value'])
 
         # Prepare a subgraph of constraints : given index edges are selected randomly among the constraint list
         l = len(ex['i_edges_possible']) # compute the number of subnode constraints on the current ex 
@@ -55,7 +55,7 @@ def collect_batch(batch, node_elements, edge_elements, lMax, prop_max_edges_give
         for k in edge_elements:
             i_given_sparse_features = torch.nonzero(curr_given_index_edges - ex['sparse_edge_features'][k]['index'].unsqueeze(1) == 0,
                                                     as_tuple=True)[0]  # indices of ex['sparse_edge_features']['index'] that are in i_given
-            batch_data.sparse_edge_features[k.name]['value'].append(ex['sparse_edge_features'][k]['value'][i_given_sparse_features])
+            batch_data.sparse_edge_features[k]['value'].append(ex['sparse_edge_features'][k]['value'][i_given_sparse_features])
 
         # Mask to represent unknown connections
         nb_edges_connection = len(ex['incidences'])
@@ -69,7 +69,7 @@ def collect_batch(batch, node_elements, edge_elements, lMax, prop_max_edges_give
     return batch_data
 
 
-def collate(batch, node_feature_dims, edge_feature_dims, lMax, prop_max_edges_given=0.9, generation=False, mask_attention=True):
+def collate(batch, node_feature_dims, edge_feature_dims, edge_idx_map,  lMax, prop_max_edges_given=0.9, generation=False, mask_attention=True):
     """
     Function to collate examples in one batch.
     batch: list of examples;
@@ -93,7 +93,7 @@ def collate(batch, node_feature_dims, edge_feature_dims, lMax, prop_max_edges_gi
 
     for key in batch_data.sparse_edge_features.keys():
         batch_data.sparse_edge_features[key]['index'] = torch.nonzero(
-                                batch_data.edge_features == EDGE_IDX_MAP.get(key, -1), as_tuple=True)[0]
+                                batch_data.edge_features == edge_idx_map.get(key, -1), as_tuple=True)[0]
         batch_data.sparse_edge_features[key]['value'] = torch.vstack(batch_data.sparse_edge_features[key]['value'])
         batch_data.sparse_edge_features[key]['value'] = batch_data.sparse_edge_features[key]['value'].repeat(2, 1)
 
