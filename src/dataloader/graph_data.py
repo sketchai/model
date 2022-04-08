@@ -15,10 +15,14 @@ from src.utils.maps import *
 RNG = np.random.default_rng()
 
 def convert_in_tensor(path:str, convert_tensor:bool):
+    try:
+        array = flat_array.load_flat_array(path)
+    except ValueError:
+        array = np.load(path)
     if convert_tensor :
-        return torch.tensor(flat_array.load_flat_array(path)) 
+        return torch.tensor(array) 
     else :
-        return flat_array.load_flat_array(path)
+        return array
 
 def load_binary_file(path:str, convert_tensor: bool = False, data_string:str = ""):
     if path.endswith('.npy'):
@@ -56,8 +60,9 @@ class GraphDataset(torch.utils.data.Dataset):
         self.datasets = load_binary_file(path_seq, convert_tensor=False, data_string= 'final')
         self.cumulative_sizes = self.cumsum(self.datasets)
         logger.debug('Load weights')
-        self.weights = load_binary_file(path_weights, convert_tensor=False, data_string= 'weights')
-
+        self.weights = load_binary_file(path_weights, convert_tensor=True, data_string= 'weights')
+        if isinstance(self.weights, list):
+            self.weights = torch.cat(self.weights)
 
     def __len__(self):
         return self.cumulative_sizes[-1]
