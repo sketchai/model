@@ -7,16 +7,13 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger()
 
 
-
-from sketchgraphs_models.autoconstraint import dataset
-from sketchgraphs.data import flat_array, sequence
-from src.utils.maps import *
+from src.utils.flat_array import load_flat_array
 
 RNG = np.random.default_rng()
 
 def convert_in_tensor(path:str, convert_tensor:bool):
     try:
-        array = flat_array.load_flat_array(path)
+        array = load_flat_array(path)
     except ValueError:
         array = np.load(path)
     if convert_tensor :
@@ -24,16 +21,9 @@ def convert_in_tensor(path:str, convert_tensor:bool):
     else :
         return array
 
-def load_binary_file(path:str, convert_tensor: bool = False, data_string:str = ""):
-    if path.endswith('.npy'):
-        return [convert_in_tensor(path, convert_tensor)]
-    else :
-        dataset = []
-        for i in range(n_slice):
-            path_file = os.path.join(path, f'slice_{i}_{data_string}.npy')
-            dataset.append(convert_in_tensor(path, convert_tensor))
-        dataset = torch.cat(dataset)
-        return dataset 
+def load_binary_file(path:str, convert_tensor: bool = False):
+    return [convert_in_tensor(path, convert_tensor)]
+
         
 
 class GraphDataset(torch.utils.data.Dataset):
@@ -57,10 +47,10 @@ class GraphDataset(torch.utils.data.Dataset):
         n_slice: int, number of slices to concatenate, mandatory if f_seqs is a folder.
         """
         logger.debug('Load datasets...')
-        self.datasets = load_binary_file(path_seq, convert_tensor=False, data_string= 'final')
+        self.datasets = load_binary_file(path_seq, convert_tensor=False)
         self.cumulative_sizes = self.cumsum(self.datasets)
         logger.debug('Load weights')
-        self.weights = load_binary_file(path_weights, convert_tensor=True, data_string= 'weights')
+        self.weights = load_binary_file(path_weights, convert_tensor=True)
         if isinstance(self.weights, list):
             self.weights = torch.cat(self.weights)
 

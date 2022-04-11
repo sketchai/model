@@ -3,8 +3,7 @@ import logging
 import torch
 import pickle
 from src.utils.to_dict import yaml_to_dict
-import sys 
-sys.path.append('/home/i37181/Documents/Projets/CAO/SketchGraphs/sketchgraphs')
+
 
 
 from src.models.dense_emb import DenseSparsePreEmbedding
@@ -26,13 +25,6 @@ class TestMessagePassing(unittest.TestCase):
         d_train = conf.get('train')
         with open(d_train.get('prep_parms_path'), 'rb') as f:
             d_prep = pickle.load(f)
-        # Add node_idx_map and edge_idx_map (must be placed directly into the preprocessing files)
-        from src.utils.maps import NODE_IDX_MAP, EDGE_IDX_MAP, PADDING_IDX
-        d_prep['node_idx_map'] = NODE_IDX_MAP
-        d_prep['edge_idx_map'] = EDGE_IDX_MAP
-        d_prep['padding_idx'] = PADDING_IDX
-
-        logger.debug(f'NODE_IDX_MAP={NODE_IDX_MAP}')
 
         # logger.info(f'--- d_prep= {d_prep}')
         graph_dataset = SketchGraphDataModule(conf, d_prep)
