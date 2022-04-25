@@ -24,7 +24,6 @@ def collect_batch(batch, node_elements, edge_elements, lMax, prop_max_edges_give
     batch_data.given_index_edges = []
 
     for n, ex in enumerate(batch):
-
         shift = n * lMax
 
         # node_features
@@ -115,7 +114,7 @@ def collate(batch, node_feature_dims, edge_feature_dims, edge_idx_map,  lMax, pr
     #batch_data.positions = torch.arange(lMax)
     #batch_data.src_key_padding_mask = torch.vstack(batch_data.src_key_padding_mask) if mask_attention else None
 
-    return GraBatch(
+    return(
         {
         'l_batch': len(batch),
         'node_features': batch_data.node_features,
