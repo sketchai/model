@@ -64,7 +64,7 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 
 logger_conf = conf.get('logger')
 logger_tensorboard = TensorBoardLogger(save_dir = logger_conf.get('save_dir'), name = logger_conf.get('name'), log_graph=False)
-profiler = PyTorchProfiler(profile_memory=True,export_to_chrome=True)
+profiler = PyTorchProfiler(profile_memory=True,export_to_chrome=True,schedule=torch.profiler.schedule(wait=1, warmup=1, active=5))
 
 checkpoint_callback = ModelCheckpoint(monitor='val_loss',
                                         dirpath=logger_conf.get('save_dir'),
@@ -77,11 +77,11 @@ if __name__=='__main__':
         # devices=4,
         # strategy='dp',
         gpus=1,
-        max_epochs=1, 
+        max_epochs=20, 
         # progress_bar_refresh_rate=20, 
         logger=logger_tensorboard,
-        limit_train_batches=10,
-        limit_val_batches=1,
+        limit_train_batches=200,
+        limit_val_batches=10,
         # callbacks=[checkpoint_callback],
         profiler=profiler,
     )
