@@ -32,7 +32,7 @@ class PredictSketch(pl.LightningModule):
 
         loss = GaT.loss(prediction, batch, coef_neg=self.coef_neg, weight_types=None)
         # Save loss
-        self.log('train_loss', loss, batch_size = batch.l_batch)
+        self.log('train_loss', loss, batch_size = batch['l_batch'])
         return loss 
 
 
@@ -45,11 +45,11 @@ class PredictSketch(pl.LightningModule):
             loss = GaT.loss(prediction, batch, coef_neg=self.coef_neg, weight_types=None).item()
             perfs = GaT.performances(prediction, batch, self.edge_idx_map)
 
-            self.log('metric_to_track',loss, batch_size = batch.l_batch)
-            self.log('val_loss', loss, batch_size = batch.l_batch)
-            self.log('val_perf_edge.n_edges_pos_predicted_pos', perfs[0][0],batch_size = batch.l_batch)
-            self.log('val_perf_edge.n_edges_predicted_pos', perfs[0][1],batch_size = batch.l_batch)
-            self.log('val_nb_edges_pos',perfs[0][2], batch_size = batch.l_batch)
+            self.log('metric_to_track',loss, batch_size = batch['l_batch'])
+            self.log('val_loss', loss, batch_size = batch['l_batch'])
+            self.log('val_perf_edge.n_edges_pos_predicted_pos', perfs[0][0],batch_size = batch['l_batch'])
+            self.log('val_perf_edge.n_edges_predicted_pos', perfs[0][1],batch_size = batch['l_batch'])
+            self.log('val_nb_edges_pos',perfs[0][2], batch_size = batch['l_batch'])
 
 
 

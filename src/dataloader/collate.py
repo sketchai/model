@@ -24,7 +24,6 @@ def collect_batch(batch, node_elements, edge_elements, lMax, prop_max_edges_give
     batch_data.given_index_edges = []
 
     for n, ex in enumerate(batch):
-
         shift = n * lMax
 
         # node_features
@@ -63,8 +62,16 @@ def collect_batch(batch, node_elements, edge_elements, lMax, prop_max_edges_give
         maskCompl[curr_given_index_edges] = False
 
         batch_data.edges_toInf_pos.append(ex['incidences'][maskCompl] + shift)
-        batch_data.edges_toInf_pos_types.append(ex['edge_features'][maskCompl]) 
-        batch_data.edges_toInf_neg.append(ex['edges_toInf_neg'] + shift)
+        batch_data.edges_toInf_pos_types.append(ex['edge_features'][maskCompl])
+
+        # Compute adjacency matrix to get edges_toInf_neg
+        adj_matrix = torch.zeros([ex['length']]*2, dtype=torch.bool)
+        for node_couple in ex['incidences']:
+            adj_matrix[node_couple] = True
+            adj_matrix[node_couple[1],node_couple[0]] = True
+        edges_toInf_neg = torch.nonzero(torch.triu(~adj_matrix))
+        
+        batch_data.edges_toInf_neg.append(edges_toInf_neg + shift)
         
     return batch_data
 
@@ -80,7 +87,7 @@ def collate(batch, node_feature_dims, edge_feature_dims, edge_idx_map,  lMax, pr
     generation: bool, set to False for training, to True for using the trained neural network;
     mask_attention: bool, to generate a mask on the padding nodes for the attention mecanism.
     """
-
+    batch = tensors_from_numpy(batch)
     batch_data = collect_batch(batch, node_feature_dims.keys(), edge_feature_dims.keys(),lMax, prop_max_edges_given)
 
     batch_data.node_features = torch.cat(batch_data.node_features)
@@ -115,7 +122,7 @@ def collate(batch, node_feature_dims, edge_feature_dims, edge_idx_map,  lMax, pr
     #batch_data.positions = torch.arange(lMax)
     #batch_data.src_key_padding_mask = torch.vstack(batch_data.src_key_padding_mask) if mask_attention else None
 
-    return GraBatch(
+    return(
         {
         'l_batch': len(batch),
         'node_features': batch_data.node_features,
@@ -130,3 +137,17 @@ def collate(batch, node_feature_dims, edge_feature_dims, edge_idx_map,  lMax, pr
         'positions': torch.arange(lMax),
         'is_given': batch_data.given_index_edges if generation else None  # np.ndarray cannot be moved to gpu
     })
+
+def tensors_from_numpy(batch):
+    keys_lvl_0 = [
+        'node_features','incidences','edge_features',
+        'mask_attention','i_edges_given','i_edges_possible']
+    keys_lvl_2 = ['sparse_node_features','sparse_edge_features']
+    for elt in batch:
+        for key in keys_lvl_0:
+            elt[key]=torch.from_numpy(elt[key])
+        for key in keys_lvl_2:
+            for name in elt[key]:
+                elt[key][name]['index'] = torch.from_numpy(elt[key][name]['index'])
+                elt[key][name]['value'] = torch.from_numpy(elt[key][name]['value'])
+    return batch
