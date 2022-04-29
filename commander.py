@@ -61,10 +61,11 @@ logger.info('-- Logger and Trainer initialization:...')
 from pytorch_lightning.loggers import TensorBoardLogger
 from pytorch_lightning.profiler import PyTorchProfiler
 from pytorch_lightning.callbacks import ModelCheckpoint
-
+from torch.profiler import schedule
 logger_conf = conf.get('logger')
 logger_tensorboard = TensorBoardLogger(save_dir = logger_conf.get('save_dir'), name = logger_conf.get('name'), log_graph=False)
-profiler = PyTorchProfiler(profile_memory=True,export_to_chrome=True,schedule=torch.profiler.schedule(wait=1, warmup=1, active=5))
+scheduler = schedule(wait=1, warmup=2, active=8)
+profiler = PyTorchProfiler(profile_memory=True,export_to_chrome=True,schedule=scheduler)
 
 checkpoint_callback = ModelCheckpoint(monitor='val_loss',
                                         dirpath=logger_conf.get('save_dir'),
@@ -73,17 +74,18 @@ checkpoint_callback = ModelCheckpoint(monitor='val_loss',
                                         save_weights_only=True)
 if __name__=='__main__':
     trainer = pl.Trainer(
-        # accelerator='gpu',
+            # accelerator='gpu',
         # devices=4,
-        # strategy='dp',
+        # strategy='ddp',
         gpus=1,
-        max_epochs=20, 
+        max_epochs=200, 
         # progress_bar_refresh_rate=20, 
         logger=logger_tensorboard,
-        limit_train_batches=200,
-        limit_val_batches=10,
+        limit_train_batches=2000,
+        limit_val_batches=1,
+        # val_percent_check=0,
         # callbacks=[checkpoint_callback],
-        profiler=profiler,
+        # profiler=profiler,
     )
     logger.info('-- Logger and Trainer initialization: end')
 

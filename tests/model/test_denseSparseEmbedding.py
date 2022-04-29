@@ -44,7 +44,12 @@ class TestDenseSparseEmbedding(unittest.TestCase):
         # device = torch.device('cuda') 
 
         for i, batch in enumerate(dataset):
+            class AttrDict(dict):
+                def __init__(self, base_dict:dict):
+                    self.__dict__ = base_dict
+
             # batch : 2 circles
+            batch = AttrDict(batch)
             logger.info(f'Fixe feature')
             logger.info(f'Input tensor keys: {batch.node_features}')
             fixed_embeddings = node_embedding.fixed_embedding(batch.node_features)
