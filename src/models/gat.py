@@ -75,7 +75,7 @@ class GaT(pl.LightningModule):
         self.transformer_encoder = torch.nn.TransformerEncoder(encoder_layer, num_layers=d_model.get('num_layers'))
 
         self.prediction_edge = torch.nn.Linear(embedding_dim, 1)
-        self.prediction_type = torch.nn.Linear(embedding_dim, len(d_preprocessing_params.get('edge_idx_map')))
+        self.prediction_type = torch.nn.Linear(embedding_dim, len(d_preprocessing_params.get('edge_idx_map')) - 1)
 
     def forward(self, batch_data) -> Dict:
         """
@@ -151,23 +151,18 @@ class GaT(pl.LightningModule):
         device = data.edges_toInf_pos_types.device
 
         with torch.no_grad():
-            n_edges_pos_predicted_pos = torch.sum(prediction['edges_pos'] > 0).item()
-            n_edges_predicted_pos = n_edges_pos_predicted_pos + torch.sum(prediction['edges_neg'] > 0).item()
-            n_edges_pos = len(prediction['edges_pos'])
 
-            types_evaluated_i = torch.arange(len(edge_idx_map)).unsqueeze(0).to(device)
-            data.edges_toInf_pos_types = data.edges_toInf_pos_types.unsqueeze(1)
+            edges_pos = prediction['edges_pos'].cpu().detach().numpy()
+            edges_neg = prediction['edges_neg'].cpu().detach().numpy()
+
 
             if len(prediction.get('type')) != 0 :
-                i_predicted = torch.argmax(prediction['type'].to(device), dim=-1, keepdim=True)
-                n_edges_i_predicted_i = torch.count_nonzero((i_predicted == types_evaluated_i) & (i_predicted.to(device) == data.edges_toInf_pos_types), axis=0)
-                n_edges_predicted_i = torch.count_nonzero(i_predicted == types_evaluated_i, axis=0)
-                n_edges_i = torch.count_nonzero(data.edges_toInf_pos_types == types_evaluated_i, axis=0)
-            else : # Cas ou il n'y as pas de contraintes predites
-                n_edges_i = torch.tensor([])
-                n_edges_predicted_i = torch.tensor([])
-                n_edges_i_predicted_i = torch.tensor([])
+                predicted_type = torch.argmax(
+                    prediction['type'], dim=-1).cpu().detach().numpy()
 
-        return ([n_edges_pos_predicted_pos, n_edges_predicted_pos, n_edges_pos],
-                [n_edges_i_predicted_i.tolist(), n_edges_predicted_i.tolist(), n_edges_i.tolist()])
+            # Cas ou il n'y as pas de contraintes predites
+            else :
+                predicted_type = torch.tensor([])
+            true_type = data.edges_toInf_pos_types.cpu().detach().numpy()
 
+        return edges_pos, edges_neg, predicted_type, true_type
