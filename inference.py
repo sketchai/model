@@ -83,7 +83,7 @@ graph_dataset = SketchGraphDataModule(conf, d_prep)
 dataset = graph_dataset.val_dataloader()
 logger.debug(f'dataset size={len(dataset)}')
 logger.debug(f'dataset.dataset: nb size={len(dataset.dataset)}')
-
+EDGE_IDX_MAP = d_prep.get('edge_idx_map')
 EDGE_IDX_MAP_REVERSE = {i: t for t, i in EDGE_IDX_MAP.items()}
 
 import numpy as np
