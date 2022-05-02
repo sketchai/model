@@ -59,11 +59,14 @@ class PredictSketch(pl.LightningModule):
         self.log('metric_to_track',loss)
         self.log('val_loss', loss)
 
-        self.log_binary_classification(edges_pos, edges_neg, tag='val')
+        self.log_binary_classification(edges_pos, edges_neg, tag='val',batch_idx=batch_idx)
 
-        self.log_multiclass(true_type, predicted_type, tag='val')
+        self.log_multiclass(true_type, predicted_type, tag='val',batch_idx=batch_idx)
 
-    def log_binary_classification(self, edges_pos, edges_neg, tag):
+        if (self.current_epoch+1)%5==0 and batch_idx==0:
+            self.log_embeddings(batch, tag='val')
+
+    def log_binary_classification(self, edges_pos, edges_neg, tag, batch_idx):
         tensorboard = self.logger.experiment
         tp = np.sum(edges_pos > 0)
         fn = np.sum(edges_pos < 0)
@@ -77,22 +80,57 @@ class PredictSketch(pl.LightningModule):
             self.log(f'{tag}/bin_accuracy', accuracy)
             self.log(f'{tag}/bin_precision', precision)
             self.log(f'{tag}/bin_recall',recall)
-        label = np.concatenate([np.ones([len(edges_pos)]), np.zeros([len(edges_neg)])], axis = 0)
-        scalar_pred = np.concatenate([edges_pos,edges_neg], axis = 0).flatten()
-        predictions = 1 / (1 + np.exp(-scalar_pred))
-        tensorboard.add_pr_curve(f'{tag}/pr_curve', label, predictions,global_step=self.global_step)
 
-    def log_multiclass(self,true_type, predicted_type, tag):
+        #TODO add aggregation (for now only one batch is used to compute the curve)
+        if batch_idx==0:
+            label = np.concatenate([np.ones([len(edges_pos)]), np.zeros([len(edges_neg)])], axis = 0)
+            scalar_pred = np.concatenate([edges_pos,edges_neg], axis = 0).flatten()
+            predictions = 1 / (1 + np.exp(-scalar_pred))
+            tensorboard.add_pr_curve(f'{tag}/pr_curve', label, predictions,global_step=self.global_step)
+
+    def log_multiclass(self,true_type, predicted_type, tag, batch_idx):
         tensorboard = self.logger.experiment
         label_names = list(self.edge_idx_map.keys())[:-1]
 
         accuracy = np.mean(predicted_type==true_type)
         self.log(f'{tag}/class_accuracy', accuracy)
-        if confusion_matrix is not None:
-            cm = confusion_matrix(true_type, predicted_type, labels=np.arange(len(label_names)), normalize=None)
+        #TODO add aggregation (for now only one batch is used to compute the matrix)
+        if confusion_matrix is not None and batch_idx==0:
+            cm = confusion_matrix(true_type, predicted_type, labels=np.arange(len(label_names)), normalize='pred')
             disp = ConfusionMatrixDisplay(
                 confusion_matrix=cm,
                 display_labels=label_names)
             fig, ax = plt.subplots()
             disp.plot(ax=ax,xticks_rotation='vertical',include_values=False,)
             tensorboard.add_figure('confusion_matrix',fig,global_step=self.global_step)
+
+    def log_embeddings(self, batch,tag=''):
+        embeddings = self.model.embeddings(batch)
+        tensorboard = self.logger.experiment
+        
+        node_embeddings = {k:v for k,v in embeddings.items() if 'node' in k}
+        node_inverse_map = {i: t for t, i in self.node_idx_map.items()}
+        node_label_names = [node_inverse_map[k] for k in batch['node_features'].detach().cpu().numpy()]
+        for key, array in node_embeddings.items():
+            tensorboard.add_embedding(
+                array,metadata=node_label_names,tag=f'{tag}/epoch_{self.current_epoch}/{key}')
+
+        key = 'edges_bf_msg_passing'
+        array = embeddings[key]
+        edge_inverse_map = {i: t for t, i in self.edge_idx_map.items()}
+        edge_label_names = [edge_inverse_map[k] for k in batch['edge_features'].detach().cpu().numpy()]
+        tensorboard.add_embedding(array,metadata=edge_label_names,tag=f'{tag}/epoch_{self.current_epoch}/{key}')
+
+        pos_embedd = embeddings['edges_pos_after_transformer']
+        neg_embedd = embeddings['edges_neg_after_transformer']
+        array = np.concatenate([pos_embedd, neg_embedd], axis=0)
+        edge_label = ['pos']*pos_embedd.shape[0] + ['neg']*neg_embedd.shape[0]
+        tensorboard.add_embedding(array,metadata=edge_label,tag=f'{tag}/epoch_{self.current_epoch}/binary_edge_classification')
+
+        
+        key = 'edges_pos_after_transformer'
+        array = embeddings[key]
+        edge_inverse_map = {i: t for t, i in self.edge_idx_map.items()}
+        print(embeddings['inferred_edges_pos_type'].shape)
+        edge_label_names = [edge_inverse_map[k] for k in embeddings['inferred_edges_pos_type']]
+        tensorboard.add_embedding(array,metadata=edge_label_names,tag=f'{tag}/epoch_{self.current_epoch}/edge_type_inference')
