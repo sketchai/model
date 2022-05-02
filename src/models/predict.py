@@ -71,7 +71,7 @@ class PredictSketch(pl.LightningModule):
         if tp>0:
             precision = tp / (tp + fp)
             recall = tp / (tp + fn)
-            accuracy = (tp + fn) / (tp + fn + tn + fp)
+            accuracy = (tp + tn) / (tp + fn + tn + fp)
             self.log(f'{tag}/bin_accuracy', accuracy)
             self.log(f'{tag}/bin_precision', precision)
             self.log(f'{tag}/bin_recall',recall)
@@ -87,7 +87,7 @@ class PredictSketch(pl.LightningModule):
         accuracy = np.mean(predicted_type==true_type)
         self.log(f'{tag}/class_accuracy', accuracy)
         if confusion_matrix is not None:
-            cm = confusion_matrix(true_type, predicted_type, labels=np.arange(len(label_names)), normalize=None)
+            cm = confusion_matrix(true_type, predicted_type, labels=np.arange(len(label_names)), normalize='pred')
             disp = ConfusionMatrixDisplay(
                 confusion_matrix=cm,
                 display_labels=label_names)
