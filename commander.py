@@ -53,6 +53,7 @@ model = GaT(d_model, preprocessing_params)
 
 from src.models.predict import PredictSketch
 conf['edge_idx_map'] = preprocessing_params.get('edge_idx_map')
+conf['node_idx_map'] = preprocessing_params.get('node_idx_map')
 sketchPredictionmodel = PredictSketch(model, conf)
 logger.info('-- Model initialization: end')
 
