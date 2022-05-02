@@ -166,3 +166,40 @@ class GaT(pl.LightningModule):
             true_type = data.edges_toInf_pos_types.cpu().detach().numpy()
 
         return edges_pos, edges_neg, predicted_type, true_type
+
+    def embeddings(self,batch_data)->dict:
+        """returns embeddings for visualization"""
+        with torch.no_grad():
+            data = AttrDict(batch_data)
+
+            embeddings = {}
+
+            # Compute node and edge embedding
+            node_embedding = self.node_embedding(data.node_features, data.sparse_node_features)
+            edge_embedding = self.edge_embedding(data.edge_features, data.sparse_edge_features)
+
+            embeddings['nodes_bf_msg_passing'] = node_embedding.cpu().detach().numpy()
+            embeddings['edges_bf_msg_passing'] = edge_embedding.cpu().detach().numpy()
+            # Agregate node and edge information (message passing)
+            agreg = self.aggregate_by_incidence(node_embedding, data.incidences, edge_embedding)
+            input_embedding = node_embedding + agreg
+
+            embeddings['nodes_after_msg_passing'] = input_embedding.cpu().detach().numpy()
+            # Update input with positional encoding
+            if self.positional_encoding is not None:
+                input_embedding += self.positional_encoding(data.positions.tile(data.l_batch))
+
+            input_embedding = input_embedding.view((data.l_batch, self.lMax, self.embedding_dim)) # reshape
+            output_transformer = torch.transpose(self.transformer_encoder(torch.transpose(input_embedding, 0, 1),
+                                                                        src_key_padding_mask=data.src_key_padding_mask), 0, 1)  # Apply Transformer
+
+            edges_neg, edges_pos = data.edges_toInf_neg, data.edges_toInf_pos
+            representation_final_edges = GaT.representation_final_edges(output_transformer, edges_neg, edges_pos)
+
+            embeddings['nodes_after_transformer'] = output_transformer.flatten(end_dim=1).cpu().detach().numpy()
+            embeddings['edges_pos_after_transformer'] = representation_final_edges['edges_pos'].cpu().detach().numpy()
+            embeddings['edges_neg_after_transformer'] = representation_final_edges['edges_neg'].cpu().detach().numpy()
+
+            inferred_edges_pos_type = self.prediction_type(representation_final_edges['edges_pos']).cpu().detach().numpy()
+            embeddings['inferred_edges_pos_type'] = np.argmax(inferred_edges_pos_type,axis=1)
+        return embeddings
