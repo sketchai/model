@@ -1,3 +1,4 @@
+import os
 import unittest
 import logging
 import pickle
@@ -24,7 +25,14 @@ class TestDenseSparseEmbedding(unittest.TestCase):
         # Load an example
         conf = yaml_to_dict('tests/asset/mock/gat_example.yml')
         d_train = conf.get('train')
-        with open(d_train.get('prep_parms_path'), 'rb') as f:
+
+        # update path
+        main_dir = conf.get('experiment').get('dir')
+        conf['train']['prep_parms_path'] = os.path.join(main_dir, conf['train']['file_prep_parms'])
+        for x in ['data', 'weights']:
+            conf['train_data'][f'path_{x}'] = os.path.join(main_dir, conf['train_data'][f'file_{x}'])    
+            
+        with open(d_train.get('file_prep_parms'), 'rb') as f:
             d_prep = pickle.load(f)
 
         # logger.info(f'--- d_prep= {d_prep}')
