@@ -7,7 +7,8 @@ __pycache__/
 # Poetry specific file
 poetry.lock
 
-
+#symbolic link
+data
 
 # Unit test / coverage reports
 .coverage

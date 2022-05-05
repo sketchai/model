@@ -12,6 +12,9 @@ import logging
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger()
 
+class AttrDict(dict):
+    def __init__(self, base_dict:dict):
+        self.__dict__ = base_dict
 
 class GaT(pl.LightningModule):
     """
@@ -82,14 +85,11 @@ class GaT(pl.LightningModule):
             Outputs :
                       (Dict) : a dict containing the following key : edges_pos, edges_neg and type
         """
-
+        data = AttrDict(batch_data)
 
         # Compute node and edge embedding
-        data = GraBatch(data)
-        # data.load_cuda_async(self.device)
-
-        node_embedding = self.node_embedding(data.node_features, data.sparse_node_features_index, data.sparse_node_features_value)
-        edge_embedding = self.edge_embedding(data.edge_features, data.sparse_edge_features_index, data.sparse_edge_features_value)
+        node_embedding = self.node_embedding(data.node_features, data.sparse_node_features)
+        edge_embedding = self.edge_embedding(data.edge_features, data.sparse_edge_features)
 
         # Agregate node and edge information (message passing)
         agreg = self.aggregate_by_incidence(node_embedding, data.incidences, edge_embedding)
@@ -123,7 +123,11 @@ class GaT(pl.LightningModule):
 
 
         # Create a tensor of size node_embedding.shape[0] times list(edge_messages.shape[1:])
+<<<<<<< HEAD
         output = node_embedding.new_zeros([node_embedding.shape[0]] + list(edge_messages.shape[1:]))
+=======
+        output = torch.zeros([node_embedding.shape[0]] + list(edge_messages.shape[1:])).type_as(node_embedding)
+>>>>>>> 70414329bb16a7d36e3620af04a3a9bd01f67211
         output.index_add_(0, incidence[0], edge_messages) # sum for each node on incidence[0]
         return output
 
@@ -134,20 +138,29 @@ class GaT(pl.LightningModule):
             'edges_pos': torch.index_select(output, 0, edges_pos[:, 0]) * torch.index_select(output, 0, edges_pos[:, 1])}
 
     def loss(prediction, data, coef_neg=1., weight_types=None):
+<<<<<<< HEAD
         data = GraBatch(data)
         device = data.edges_toInf_pos_types.device
+=======
+        # device = data.edges_toInf_pos_types.device
+        data = AttrDict(data)
+>>>>>>> 70414329bb16a7d36e3620af04a3a9bd01f67211
         loss_edge_pos = torch.mean(torch.nn.functional.softplus(-prediction['edges_pos']))
         loss_edge_neg = torch.mean(torch.nn.functional.softplus(prediction['edges_neg']))
 
-        loss_type = torch.nn.functional.cross_entropy(prediction['type'].to(device), data.edges_toInf_pos_types, weight=weight_types)
+        loss_type = torch.nn.functional.cross_entropy(prediction['type'], data.edges_toInf_pos_types, weight=weight_types)
 
         return loss_edge_pos + coef_neg * loss_edge_neg + loss_type
 
-    def performances(prediction, data, edge_idx_map):
+    def performances(prediction, batch_data, edge_idx_map):
         """
         To assess the precision and the recall of the neural network.
         """
+<<<<<<< HEAD
         data = GraBatch(data)
+=======
+        data = AttrDict(batch_data)
+>>>>>>> 70414329bb16a7d36e3620af04a3a9bd01f67211
         device = data.edges_toInf_pos_types.device
 
         with torch.no_grad():

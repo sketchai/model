@@ -7,7 +7,6 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger()
 
 
-
 ######## STEP 1 : Import Datasets
 from src.utils.to_dict import yaml_to_dict
 conf = yaml_to_dict('config/gat.yml')
@@ -49,6 +48,7 @@ d_model = conf.get('model')
 use_cuda = not d_model.get('cpu') and torch.cuda.is_available()
 device = torch.device('cuda') if use_cuda else 'cpu'
 
+<<<<<<< HEAD
 # Example and create model
 logger_conf = conf.get('logger')
 filepath = os.path.join(logger_conf.get('save_dir'),'model.onnx')
@@ -58,6 +58,10 @@ for d in train_data:
     break
 model = GaT(d_model, preprocessing_params, example=input_sample)
 model.to(device)
+=======
+model = GaT(d_model, preprocessing_params)
+# model.to(device)
+>>>>>>> 70414329bb16a7d36e3620af04a3a9bd01f67211
 
 from src.models.predict import PredictSketch
 conf['edge_idx_map'] = preprocessing_params.get('edge_idx_map')
@@ -67,65 +71,64 @@ logger.info('-- Model initialization: end')
 # Initialize a trainer
 logger.info('-- Logger and Trainer initialization:...')
 from pytorch_lightning.loggers import TensorBoardLogger
+from pytorch_lightning.profiler import PyTorchProfiler
 from pytorch_lightning.callbacks import ModelCheckpoint
 
 logger_conf = conf.get('logger')
-logger_tensorboard = TensorBoardLogger(save_dir = logger_conf.get('save_dir'), name = logger_conf.get('name'), log_graph=True)
-
+logger_tensorboard = TensorBoardLogger(save_dir = logger_conf.get('save_dir'), name = logger_conf.get('name'), log_graph=False)
+profiler = PyTorchProfiler(profile_memory=True,export_to_chrome=True,schedule=torch.profiler.schedule(wait=1, warmup=1, active=5))
 
 checkpoint_callback = ModelCheckpoint(monitor='val_loss',
                                         dirpath=logger_conf.get('save_dir'),
                                         filename='gat-{epoch:02d}-{val_loss:.2f}',
                                         mode="max",
                                         save_weights_only=True)
-trainer = pl.Trainer(gpus=1, max_epochs=1, 
-                    progress_bar_refresh_rate=20, 
-                    logger=logger_tensorboard,
-                    limit_train_batches=10,
-                    limit_val_batches=10,
-                    callbacks=[checkpoint_callback]
-                    )
-
-logger.info('-- Logger and Trainer initialization: end')
-
-# Train the model 
-logger.info('-- Model fit: ...')
-trainer.fit(sketchPredictionmodel, datamodule=data)
-logger.info('-- Model fit: Done')
-
-model_scripted = torch.jit.script(model) # Export to TorchScript
-model_scripted.save(os.path.join(logger_conf.get('save_dir'),'model_scripted.pt')) # Save
-torch.save(model.state_dict(), os.path.join(logger_conf.get('save_dir'),'model_scripted.pt'))
 
 
 
-logger.info(f'sample data = {input_sample}')
-input_nampes = []
-dummy_inputs  = input_sample
 
-# l_key = ['l_batch', 'node_features', 'sparse_node_features', 
-#         'incidences', 'edge_features', 'sparse_edge_features', 
-#         'edges_toInf_pos', 'edges_toInf_pos_types', 
-#         'edges_toInf_neg', 'src_key_padding_mask', 'positions', 'is_given']
-
-# test = {}
-# for key in l_key[:1]:
-#     test[key] = dummy_inputs.get(key)
-#     if key == 'l_batch':
-#         test[key] = [test[key]] #torch.tensor(test[key])
-
-# here = torch._C._jit_flatten(test)
-# logger.info(f'here = {here} ')
-
-# raise Error('Stop code')
-
-# model.to_onnx(filepath, dummy_inputs, export_params=True, verbose = True)
-#, input_names = input_names, output_names = output_names)
-
-script = model.to_torchscript()
-
-# save for use in production environment
-torch.jit.save(script, filepath)
 
 ######## STEP 3 : Compute validation
 # trainer.test(test_dataloaders=test)
+if __name__=='__main__':
+    trainer = pl.Trainer(
+        # accelerator='gpu',
+        # devices=4,
+        # strategy='dp',
+        gpus=1,
+        max_epochs=20, 
+        # progress_bar_refresh_rate=20, 
+        logger=logger_tensorboard,
+        limit_train_batches=200,
+        limit_val_batches=10,
+        # callbacks=[checkpoint_callback],
+        profiler=profiler,
+    )
+    logger.info('-- Logger and Trainer initialization: end')
+
+    # Train the model 
+    logger.info('-- Model fit: ...')
+    trainer.fit(sketchPredictionmodel, datamodule=data)
+    logger.info('-- Model fit: Done')
+
+    ######## STEP 3 : Compute validation
+    # trainer.test(test_dataloaders=test)
+
+    ######## STEP 4 : Export model
+    filepath = os.path.join(logger_conf.get('save_dir'),'model_scripted.pt')
+    # model_scripted = torch.jit.script(model) # Export to TorchScript
+    # model_scripted.save(os.path.join(logger_conf.get('save_dir'),'model_scripted.pt')) # Save
+    # torch.save(model.state_dict(), os.path.join(logger_conf.get('save_dir'),'model_scripted.pt'))
+
+
+
+    # logger.info(f'sample data = {input_sample}')
+    # input_nampes = []
+    # dummy_inputs  = input_sample
+    # model.to_onnx(filepath, dummy_inputs, export_params=True, verbose = True)
+    #, input_names = input_names, output_names = output_names)
+
+    script = model.to_torchscript()
+
+    # save for use in production environment
+    torch.jit.save(script, filepath)
