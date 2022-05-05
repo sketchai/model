@@ -1,4 +1,4 @@
-import logging 
+import logging
 import pytorch_lightning as pl
 import torch
 import os 
@@ -49,7 +49,14 @@ d_model = conf.get('model')
 use_cuda = not d_model.get('cpu') and torch.cuda.is_available()
 device = torch.device('cuda') if use_cuda else 'cpu'
 
-model = GaT(d_model, preprocessing_params)
+# Example and create model
+logger_conf = conf.get('logger')
+filepath = os.path.join(logger_conf.get('save_dir'),'model.onnx')
+train_data = data.train_dataloader()
+for d in train_data:
+    input_sample = d
+    break
+model = GaT(d_model, preprocessing_params, example=input_sample)
 model.to(device)
 
 from src.models.predict import PredictSketch
@@ -71,11 +78,11 @@ checkpoint_callback = ModelCheckpoint(monitor='val_loss',
                                         filename='gat-{epoch:02d}-{val_loss:.2f}',
                                         mode="max",
                                         save_weights_only=True)
-trainer = pl.Trainer(gpus=1, max_epochs=20, 
+trainer = pl.Trainer(gpus=1, max_epochs=1, 
                     progress_bar_refresh_rate=20, 
                     logger=logger_tensorboard,
-                    limit_train_batches=100,
-                    limit_val_batches=100,
+                    limit_train_batches=10,
+                    limit_val_batches=10,
                     callbacks=[checkpoint_callback]
                     )
 
@@ -86,9 +93,39 @@ logger.info('-- Model fit: ...')
 trainer.fit(sketchPredictionmodel, datamodule=data)
 logger.info('-- Model fit: Done')
 
-# model_scripted = torch.jit.script(model) # Export to TorchScript
-# model_scripted.save(os.path.join(logger_conf.get('save_dir'),'model_scripted.pt')) # Save
+model_scripted = torch.jit.script(model) # Export to TorchScript
+model_scripted.save(os.path.join(logger_conf.get('save_dir'),'model_scripted.pt')) # Save
 torch.save(model.state_dict(), os.path.join(logger_conf.get('save_dir'),'model_scripted.pt'))
+
+
+
+logger.info(f'sample data = {input_sample}')
+input_nampes = []
+dummy_inputs  = input_sample
+
+# l_key = ['l_batch', 'node_features', 'sparse_node_features', 
+#         'incidences', 'edge_features', 'sparse_edge_features', 
+#         'edges_toInf_pos', 'edges_toInf_pos_types', 
+#         'edges_toInf_neg', 'src_key_padding_mask', 'positions', 'is_given']
+
+# test = {}
+# for key in l_key[:1]:
+#     test[key] = dummy_inputs.get(key)
+#     if key == 'l_batch':
+#         test[key] = [test[key]] #torch.tensor(test[key])
+
+# here = torch._C._jit_flatten(test)
+# logger.info(f'here = {here} ')
+
+# raise Error('Stop code')
+
+# model.to_onnx(filepath, dummy_inputs, export_params=True, verbose = True)
+#, input_names = input_names, output_names = output_names)
+
+script = model.to_torchscript()
+
+# save for use in production environment
+torch.jit.save(script, filepath)
 
 ######## STEP 3 : Compute validation
 # trainer.test(test_dataloaders=test)

@@ -15,4 +15,4 @@ class NumericalFeaturesEmbedding(torch.nn.Module):
         super(NumericalFeaturesEmbedding, self).__init__()
 
     def forward(self, embeddings):
-        return embeddings.mean(axis=-2)
+        return embeddings.mean(dim=-2)

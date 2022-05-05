@@ -13,8 +13,10 @@ RNG = np.random.default_rng()
 def collect_batch(batch, node_elements, edge_elements, lMax, prop_max_edges_given):
     batch_data = lambda : None
     batch_data.node_features = []
-    batch_data.sparse_node_features = {k: {'index': [], 'value': []} for k in node_elements}
-    batch_data.sparse_edge_features = {k: {'index': [], 'value': []} for k in edge_elements}
+    batch_data.sparse_node_features_index = {k: [] for k in node_elements}
+    batch_data.sparse_node_features_value = {k: [] for k in node_elements}
+    batch_data.sparse_edge_features_index = {k: [] for k in edge_elements}
+    batch_data.sparse_edge_features_value = {k: [] for k in edge_elements}
     batch_data.incidences = []
     batch_data.edges_toInf_pos = []
     batch_data.edge_features = []
@@ -35,8 +37,8 @@ def collect_batch(batch, node_elements, edge_elements, lMax, prop_max_edges_give
 
         # sparse_node_features 
         for k in node_elements :
-            batch_data.sparse_node_features[k]['index'].append(ex['sparse_node_features'][k]['index'] + shift) # shift ?
-            batch_data.sparse_node_features[k]['value'].append(ex['sparse_node_features'][k]['value'])
+            batch_data.sparse_node_features_index[k].append(ex['sparse_node_features'][k]['index'] + shift) # shift ?
+            batch_data.sparse_node_features_value[k].append(ex['sparse_node_features'][k]['value'])
 
         # Prepare a subgraph of constraints : given index edges are selected randomly among the constraint list
         l = len(ex['i_edges_possible']) # compute the number of subnode constraints on the current ex 
@@ -55,7 +57,7 @@ def collect_batch(batch, node_elements, edge_elements, lMax, prop_max_edges_give
         for k in edge_elements:
             i_given_sparse_features = torch.nonzero(curr_given_index_edges - ex['sparse_edge_features'][k]['index'].unsqueeze(1) == 0,
                                                     as_tuple=True)[0]  # indices of ex['sparse_edge_features']['index'] that are in i_given
-            batch_data.sparse_edge_features[k]['value'].append(ex['sparse_edge_features'][k]['value'][i_given_sparse_features])
+            batch_data.sparse_edge_features_value[k].append(ex['sparse_edge_features'][k]['value'][i_given_sparse_features])
 
         # Mask to represent unknown connections
         nb_edges_connection = len(ex['incidences'])
@@ -84,18 +86,18 @@ def collate(batch, node_feature_dims, edge_feature_dims, edge_idx_map,  lMax, pr
     batch_data = collect_batch(batch, node_feature_dims.keys(), edge_feature_dims.keys(),lMax, prop_max_edges_given)
 
     batch_data.node_features = torch.cat(batch_data.node_features)
-    for key in batch_data.sparse_node_features.keys():
-        batch_data.sparse_node_features[key]['index'] = torch.cat(batch_data.sparse_node_features[key]['index'])
-        batch_data.sparse_node_features[key]['value'] = torch.vstack(batch_data.sparse_node_features[key]['value'])
+    for key in batch_data.sparse_node_features_index.keys():
+        batch_data.sparse_node_features_index[key] = torch.cat(batch_data.sparse_node_features_index[key])
+        batch_data.sparse_node_features_value[key] = torch.vstack(batch_data.sparse_node_features_value[key])
 
     batch_data.edge_features = torch.cat(batch_data.edge_features)
     batch_data.edge_features = batch_data.edge_features.repeat(2)
 
-    for key in batch_data.sparse_edge_features.keys():
-        batch_data.sparse_edge_features[key]['index'] = torch.nonzero(
+    for key in batch_data.sparse_edge_features_index.keys():
+        batch_data.sparse_edge_features_index[key] = torch.nonzero(
                                 batch_data.edge_features == edge_idx_map.get(key, -1), as_tuple=True)[0]
-        batch_data.sparse_edge_features[key]['value'] = torch.vstack(batch_data.sparse_edge_features[key]['value'])
-        batch_data.sparse_edge_features[key]['value'] = batch_data.sparse_edge_features[key]['value'].repeat(2, 1)
+        batch_data.sparse_edge_features_value[key] = torch.vstack(batch_data.sparse_edge_features_value[key])
+        batch_data.sparse_edge_features_value[key] = batch_data.sparse_edge_features_value[key].repeat(2, 1)
 
     batch_data.incidences = torch.vstack(batch_data.incidences).T.contiguous()
     batch_data.incidences = torch.cat((batch_data.incidences, torch.flip(batch_data.incidences, [0])), dim=1)  # non-oriented graph, symmetrize
@@ -110,23 +112,24 @@ def collate(batch, node_feature_dims, edge_feature_dims, edge_idx_map,  lMax, pr
         batch_data.edges_toInf_neg = torch.empty((0, 2), dtype=torch.int64)
 
 
-    #batch_data.l_batch = len(batch)
-    #batch_data.given_index_edges = batch_data.given_index_edges if generation else None
-    #batch_data.positions = torch.arange(lMax)
-    #batch_data.src_key_padding_mask = torch.vstack(batch_data.src_key_padding_mask) if mask_attention else None
+    # batch_data.l_batch = torch.tensor(len(batch))
+    # batch_data.given_index_edges = batch_data.given_index_edges if generation else None
+    # batch_data.positions = torch.arange(lMax)
+    # batch_data.src_key_padding_mask = torch.vstack(batch_data.src_key_padding_mask) if mask_attention else None
 
-    return GraBatch(
-        {
-        'l_batch': len(batch),
+    return {
+        'l_batch': torch.tensor(len(batch)),
         'node_features': batch_data.node_features,
-        'sparse_node_features': batch_data.sparse_node_features,
+        'sparse_node_features_index': batch_data.sparse_node_features_index,
+        'sparse_node_features_value': batch_data.sparse_node_features_value,
         'incidences': batch_data.incidences,
         'edge_features': batch_data.edge_features,
-        'sparse_edge_features': batch_data.sparse_edge_features,
+        'sparse_edge_features_index': batch_data.sparse_edge_features_index,
+        'sparse_edge_features_value': batch_data.sparse_edge_features_value,
         'edges_toInf_pos': batch_data.edges_toInf_pos,
         'edges_toInf_pos_types': batch_data.edges_toInf_pos_types,
         'edges_toInf_neg': batch_data.edges_toInf_neg,
         'src_key_padding_mask': torch.vstack(batch_data.src_key_padding_mask) if mask_attention else None,
         'positions': torch.arange(lMax),
         'is_given': batch_data.given_index_edges if generation else None  # np.ndarray cannot be moved to gpu
-    })
+    }

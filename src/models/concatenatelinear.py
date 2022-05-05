@@ -23,5 +23,5 @@ class ConcatenateLinear(torch.nn.Module):
         self._linear = torch.nn.Linear(in_features=left_size + right_size,
                                        out_features=output_size)  # Apply a linear transform to the incoming data y = xA^T + b
 
-    def forward(self, left: torch.tensor, right: torch.tensor) -> torch.tensor:
+    def forward(self, left, right):
         return self._linear(torch.cat((left, right), dim=-1))  # concatenation on the last dimension
