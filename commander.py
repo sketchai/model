@@ -3,7 +3,7 @@ import pytorch_lightning as pl
 import torch
 import os 
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger()
 
 
@@ -79,11 +79,11 @@ if __name__=='__main__':
         # devices=4,
         # strategy='ddp',
         gpus=1,
-        max_epochs=200, 
+        max_epochs=10, 
         # progress_bar_refresh_rate=20, 
         logger=logger_tensorboard,
-        limit_train_batches=2000,
-        limit_val_batches=1,
+        limit_train_batches=100,
+        limit_val_batches=10,
         # val_percent_check=0,
         # callbacks=[checkpoint_callback],
         # profiler=profiler,

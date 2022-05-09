@@ -108,7 +108,8 @@ class GaT(pl.LightningModule):
 
         d = {"edges_pos": self.prediction_edge(representation_final_edges['edges_pos']),
              "edges_neg": self.prediction_edge(representation_final_edges['edges_neg']),
-             "type": self.prediction_type(representation_final_edges['edges_pos'])}
+             "type": self.prediction_type(representation_final_edges['edges_pos']),
+             "type_neg": self.prediction_type(representation_final_edges['edges_neg'])}
         
 
         return d

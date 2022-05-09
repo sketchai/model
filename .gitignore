@@ -3,12 +3,14 @@
 __pycache__/
 *.py[cod]
 *$py.class
+.ipynb_checkpoints
 
 # Poetry specific file
 poetry.lock
 
 #symbolic link
 data
+sketch_data
 
 # Unit test / coverage reports
 .coverage
