@@ -67,12 +67,10 @@ def collect_batch(batch, node_elements, edge_elements, lMax, prop_max_edges_give
         # Compute adjacency matrix to get edges_toInf_neg
         adj_matrix = torch.zeros([ex['length']]*2, dtype=torch.bool)
         for node_couple in ex['incidences']:
-            adj_matrix[node_couple] = True
+            adj_matrix[node_couple[0],node_couple[1]] = True
             adj_matrix[node_couple[1],node_couple[0]] = True
         edges_toInf_neg = torch.nonzero(torch.triu(~adj_matrix))
-        
         batch_data.edges_toInf_neg.append(edges_toInf_neg + shift)
-        
     return batch_data
 
 

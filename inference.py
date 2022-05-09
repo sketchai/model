@@ -7,8 +7,6 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger()
 
 import sys
-CAO_DIR = '/home/i37181/Documents/Projets/CAO/SketchGraphs'
-sys.path.append(os.path.join(CAO_DIR, 'sketchgraphs'))
 
 # Load the model
 from src.models.gat import GaT
@@ -17,12 +15,10 @@ logger.info('-- Model initialization:...')
 
 #### SG path
 import sys
-CAO_DIR = '/home/i37181/CAO_ML/git_depot/sketch_graph'
-sys.path.append(os.path.join(CAO_DIR, 'sketchgraphs'))
 
 ######## STEP 1 : Import Datasets
 from src.utils.to_dict import yaml_to_dict
-conf = yaml_to_dict('config/gat.yml')
+conf = yaml_to_dict('config/gat_inf.yml')
 
 # update path
 main_dir = conf.get('experiment').get('dir')
@@ -39,12 +35,6 @@ d_train = conf.get('train')
 import pickle
 with open(d_train.get('prep_parms_path'), 'rb') as f:
     preprocessing_params = pickle.load(f)
-
-# Add node_idx_map and edge_idx_map (must be placed directly into the preprocessing files)
-from src.utils.maps import NODE_IDX_MAP, EDGE_IDX_MAP, PADDING_IDX
-preprocessing_params['node_idx_map'] = NODE_IDX_MAP
-preprocessing_params['edge_idx_map'] = EDGE_IDX_MAP
-preprocessing_params['padding_idx'] = PADDING_IDX
 
 logger.info(f'-- Load preprocessing params')
 logger.info(f'-- -- list keys: {preprocessing_params.keys()}')
@@ -71,23 +61,16 @@ d_train = conf.get('train')
 with open(d_train.get('prep_parms_path'), 'rb') as f:
     d_prep = pickle.load(f)
 # Add node_idx_map and edge_idx_map (must be placed directly into the preprocessing files)
-from src.utils.maps import NODE_IDX_MAP, EDGE_IDX_MAP, PADDING_IDX
-d_prep['node_idx_map'] = NODE_IDX_MAP
-d_prep['edge_idx_map'] = EDGE_IDX_MAP
-d_prep['padding_idx'] = PADDING_IDX
-
-# logger.info(f'--- d_prep= {d_prep}')
 from src.dataloader.generate_dataModule import SketchGraphDataModule
 
 graph_dataset = SketchGraphDataModule(conf, d_prep)
 dataset = graph_dataset.val_dataloader()
 logger.debug(f'dataset size={len(dataset)}')
 logger.debug(f'dataset.dataset: nb size={len(dataset.dataset)}')
-
+EDGE_IDX_MAP = d_prep[
 EDGE_IDX_MAP_REVERSE = {i: t for t, i in EDGE_IDX_MAP.items()}
 
 import numpy as np
-from sketchgraphs.data import sequence
 
 with torch.no_grad():
     for i, batch in enumerate(dataset):
