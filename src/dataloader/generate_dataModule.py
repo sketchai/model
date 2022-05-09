@@ -31,6 +31,6 @@ class SketchGraphDataModule(pl.LightningDataModule):
 
     def val_dataloader(self):
         logger.info('-- Load Validation Set')
-        return generate_dataset(conf=self.d_val, batch_size=self.batch_size, collate_fn=self.collate_fn)
+        return generate_dataset(conf=self.d_val, batch_size=self.batch_size, collate_fn=self.collate_fn, sample=False)
 
     # def test_dataloader(self): 

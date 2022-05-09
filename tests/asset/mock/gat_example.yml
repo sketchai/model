@@ -1,3 +1,5 @@
+experiment:
+  dir: '.'
 
 logger:
   save_dir : 'tests/asset/output'
@@ -5,20 +7,20 @@ logger:
 
 train_data: # Train data related parameters
   num_workers: 1
-  path_data: "tests/asset/dataset/mini_example/mini_final.npy" # "sg_t16_validation_final.npy"  #folder or file name (should end with .npy)
-  path_weights: "tests/asset/dataset/mini_example/mini_weights.npy"  # "sg_t16_validation_weights.npy" # 
+  file_data: "tests/asset/dataset/mini_example/mini_final.npy" # "sg_t16_validation_final.npy"  #folder or file name (should end with .npy)
+  file_weights: "tests/asset/dataset/mini_example/mini_weights.npy"  # "sg_t16_validation_weights.npy" # 
 
 
 val_data: # Test data related parameters
     num_workers: 1
     num_batch_eval: 20
-    path_data: "tests/asset/dataset/mini_example/mini_final.npy"
-    path_weights: "tests/asset/dataset/mini_example/mini_weights.npy"
+    file_data: "tests/asset/dataset/mini_example/mini_final.npy"
+    file_weights: "tests/asset/dataset/mini_example/mini_weights.npy"
     coef_neg: 1.
 
 train:
     cpu: False
-    prep_parms_path: "tests/asset/dataset/mini_example/preprocessing_params.pkl" #"preprocessing_params.pkl" # 
+    file_prep_parms: "tests/asset/dataset/mini_example/preprocessing_params.pkl" #"preprocessing_params.pkl" # 
     batch_size: 8
     prop_max_edges_given: 0.1
 

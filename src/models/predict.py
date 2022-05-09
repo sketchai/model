@@ -1,6 +1,7 @@
 from typing import Dict
 import pytorch_lightning as pl
 import logging
+import tensorboard
 import torch
 
 from src.models.gat import GaT
@@ -17,6 +18,7 @@ class PredictSketch(pl.LightningModule):
         d_validation = conf.get('val_data')
         self.coef_neg = d_validation.get('coef_neg')
         self.edge_idx_map = conf.get('edge_idx_map')
+        self.node_idx_map = conf.get('node_idx_map')
     
 
     def configure_optimizers(self):
