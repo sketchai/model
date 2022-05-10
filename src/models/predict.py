@@ -54,14 +54,18 @@ class PredictSketch(pl.LightningModule):
             prediction = self.model(batch)
             l_batch = batch['l_batch']
             loss = GaT.loss(prediction, batch, coef_neg=self.coef_neg, weight_types=None).item()
-            perfs = GaT.performances(prediction, batch, self.edge_idx_map)
-        edges_pos, edges_neg, predicted_type, true_type = perfs
+            edges_pos = prediction['edges_pos'].cpu().detach().numpy()
+            edges_neg = prediction['edges_neg'].cpu().detach().numpy()
+            predicted_type_pos = torch.argmax(prediction['type'], dim=-1).cpu().detach().numpy()
+            predicted_type_neg = torch.argmax(prediction['type_neg'], dim=-1).cpu().detach().numpy()
+            true_type = batch['edges_toInf_pos_types'].cpu().detach().numpy()
+
         self.log('metric_to_track',loss)
         self.log('val_loss', loss)
 
         self.log_binary_classification(edges_pos, edges_neg, tag='val',batch_idx=batch_idx)
 
-        self.log_multiclass(true_type, predicted_type, tag='val',batch_idx=batch_idx)
+        self.log_multiclass(true_type, predicted_type_pos, tag='val',batch_idx=batch_idx)
 
         if (self.current_epoch+1)%5==0 and batch_idx==0:
             self.log_embeddings(batch, tag='val')

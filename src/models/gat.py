@@ -144,30 +144,6 @@ class GaT(pl.LightningModule):
 
         return loss_edge_pos + coef_neg * loss_edge_neg + loss_type
 
-    def performances(prediction, batch_data, edge_idx_map):
-        """
-        To assess the precision and the recall of the neural network.
-        """
-        data = AttrDict(batch_data)
-        device = data.edges_toInf_pos_types.device
-
-        with torch.no_grad():
-
-            edges_pos = prediction['edges_pos'].cpu().detach().numpy()
-            edges_neg = prediction['edges_neg'].cpu().detach().numpy()
-
-
-            if len(prediction.get('type')) != 0 :
-                predicted_type = torch.argmax(
-                    prediction['type'], dim=-1).cpu().detach().numpy()
-
-            # Cas ou il n'y as pas de contraintes predites
-            else :
-                predicted_type = torch.tensor([])
-            true_type = data.edges_toInf_pos_types.cpu().detach().numpy()
-
-        return edges_pos, edges_neg, predicted_type, true_type
-
     def embeddings(self,batch_data)->dict:
         """returns embeddings for visualization"""
         with torch.no_grad():
