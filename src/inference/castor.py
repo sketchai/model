@@ -1,3 +1,4 @@
+from unicodedata import category
 from sketch_data.catalog_constraint import Horizontal, Vertical, Parallel, Length, Coincident, Perpendicular, Distance, Radius, Tangent, Midpoint, Equal, Angle, HorizontalLength, VerticalLength
 from sketch_data.constraint import Constraint
 from sketch_data.sketch import Sketch
@@ -26,45 +27,35 @@ NAME_TO_CONSTRAINT_MAP = {
 
 class PredictionToCastor:
 
-    def get_constraints(sketch: Sketch, pred: EvalPrediction):
-        edge_idx_map_reverse = list(pred.edge_idx_map.keys())
-        predicted_type_name = [edge_idx_map_reverse[idx] for idx in pred.predicted_type]
-        true_type_name = [edge_idx_map_reverse[idx] for idx in pred.true_type]
+    def get_constraints(sketch: Sketch, pred: EvalPrediction)->dict:
+        """
+        returns sketch_data constraints (except true negatives)
 
+        note that for '_wrong_type' categories, the constraint type
+        is the one predicted, not the ground truth
+        """        
         encoded_sequence = format_for_encoding(sketch.sequence)
         prim_ops = [op for op in encoded_sequence if isinstance(op, Primitive)]
 
-        predicted_constraints = []
-        for i in range(len(pred.true_label)):
-            refs = tuple(pred.all_references[i].tolist())
+        l_constraints = []
+        for edge_info in pred:
+            if edge_info['category'] == 'true_negatives':
+                l_constraints.append(None)
+                continue
+
+            refs = edge_info['references']
+            label = edge_info.get('true_label')
             prim_refs = [prim_ops[ref] for ref in refs]
-            new_constraint = NAME_TO_CONSTRAINT_MAP[predicted_type_name[i]](references=prim_refs)
-            predicted_constraints.append(new_constraint)
-
-        true_constraints = []
-        for i in range(len(pred.true_type)):
-            refs = tuple(pred.all_references[i].tolist())
-            prim_refs = [prim_ops[ref] for ref in refs]
-            new_constraint = NAME_TO_CONSTRAINT_MAP[true_type_name[i]](references=prim_refs)
-            true_constraints.append(new_constraint)
-
-        return predicted_constraints, true_constraints
-
-    def get_sorted_constraints(sketch: Sketch, pred: EvalPrediction):
-        d_edges_idx = pred.sort_edges()
-        predicted_constraints, true_constraints = PredictionToCastor.get_constraints(sketch, pred)
-
-        d_constr_pred = {}
-        for key in ['true_positives', 'true_positives_wrong_type', 'false_positives',
-                        'false_negatives', 'false_negatives_wrong_type']:
-            idxes = d_edges_idx[key]
-            predicted = [predicted_constraints[idx] for idx in idxes]
-            d_constr_pred[key] = predicted
-
-        d_constr_gt = {}
-        for key in ['true_positives_wrong_type', 'false_negatives_wrong_type']:
-            idxes = d_edges_idx[key]
-            ground_truth = [true_constraints[idx] for idx in idxes]
-            d_constr_gt[key] = ground_truth
             
-        return d_constr_pred, d_constr_gt
+            if label == 0 or label == 1:
+                type_name = edge_info['predicted_type_name']
+            elif label is None:
+                type_name = edge_info['true_type_name']
+
+            if type_name == 'Subnode':
+                l_constraints.append('Subnode')
+                continue
+
+            new_constraint = NAME_TO_CONSTRAINT_MAP[type_name](references=prim_refs)
+            l_constraints.append(new_constraint)
+        return l_constraints

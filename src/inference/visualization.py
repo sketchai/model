@@ -38,7 +38,7 @@ def render_prim(prim: Primitive, ax: plt.Axes, color='black', linewidth=1) -> No
             prim.radian = True
             prim.plot(ax, color=color, linewidth=linewidth)
         elif prim.get_name == 'POINT':
-            prim.plot(ax, color=color)
+            prim.plot(ax, color=color, s=10*(2*linewidth)**2)
         else:
             prim.plot(ax, color=color, linewidth=linewidth)
 
@@ -65,12 +65,12 @@ def highlight_constraint(constraint, color='red', ax=None, color_prim=True, y_of
         ax = plt.gca()
 
     if color_prim:
-        render_prim(primitive_a, ax=ax, color=color)
+        render_prim(primitive_a, ax=ax, color=color, linewidth=3)
     xa, ya = get_prim_coords(primitive_a)
 
     if primitive_b != primitive_a:
         if color_prim:
-            render_prim(primitive_b, ax=ax, color=color)
+            render_prim(primitive_b, ax=ax, color=color, linewidth=3)
         xb, yb = get_prim_coords(primitive_b)
         arrow = matplotlib.patches.FancyArrowPatch(posA=(xa, ya),
                                                    posB=(xb, yb),
@@ -113,22 +113,24 @@ def display_constraint(sketch: Sketch, n=-1, size=10, color=None):
 
 
 COLOR_MAP = {
-    'green': 'true_positives',
-    'red': 'false_positives',
-    'blue': 'true_positives_wrong_type',
-    'orange': 'false_negatives',
-    'purple': 'false_negatives_wrong_type',
+    'true_positives': 'green',
+    'false_positives': 'red',
+    'true_positives_wrong_type': 'blue',
+    'false_negatives': 'orange',
+    'false_negatives_wrong_type': 'purple',
+    'given': 'grey',
 }
 
 OFFSET_MAP = {
-    'green': 0.02,
-    'red': 0.04,
-    'blue': 0.06,
-    'orange': 0.08,
-    'purple': 0.1,
+    'true_positives': 0.02,
+    'false_positives': 0.04,
+    'true_positives_wrong_type': 0.06,
+    'false_negatives': 0.08,
+    'false_negatives_wrong_type': 0.1,
+    'given': -0.04,
 }
 
-def display_inference(sketch, pred: EvalPrediction, legend=True):
+def display_inference(sketch: Sketch, pred: EvalPrediction, legend=True):
     """
     Creates a plt.figure representing the sketch with constraint highlighted depending on model output
 
@@ -140,84 +142,102 @@ def display_inference(sketch, pred: EvalPrediction, legend=True):
     False negatives:                    orange      1       0       A           A
     False negatives Wrong type:         purple      1       0       A           B
     True negatives:                     /           0       0       /           /
+    Given:                              grey        1       /       A           /
     
-    TODO: add given constraints in grey/black?
     """
     fig, ax = plt.subplots(figsize=(10, 10))
     render_sketch(sketch, ax=ax)
 
-    d_constr_pred, d_constr_gt = PredictionToCastor.get_sorted_constraints(sketch, pred)
+    d_categories = pred.d_categories
+    l_constraints = PredictionToCastor.get_constraints(sketch, pred)
 
-    colored_constraints = {k:d_constr_pred[v] for k,v in COLOR_MAP.items()}
-
-    for color, l_constraints in colored_constraints.items():
-        offset = OFFSET_MAP[color]
-        for constr in l_constraints:
-            highlight_constraint(constr, color=color, color_prim=False, y_offset=offset)
+    for category, l_indexes in d_categories.items():
+        if category == 'true_negatives':
+            continue
+        color = COLOR_MAP[category]
+        offset = OFFSET_MAP[category]
+        for idx in l_indexes:
+            constraint = l_constraints[idx]
+            if constraint == 'Subnode':
+                continue
+            highlight_constraint(constraint, color=color, color_prim=False, y_offset=offset)
 
     if legend:
-        add_legend(colored_constraints, ax)
+        add_legend(d_categories, ax)
+
+    return fig, ax
         
 
-def add_legend(colored_constraints, ax):
+def add_legend(d_categories, ax):
     handles = []
-    legend_names = {
-            'green':    f'True Positive {len(colored_constraints["green"]):<3}',
-            'blue':     f'True Positive wrong type {len(colored_constraints["blue"]):<3}',
-            'red':      f'False Positive {len(colored_constraints["red"]):<3}',
-            'orange':   f'False Negative {len(colored_constraints["orange"]):<3}',
-            'purple':   f'False Negative wrong type {len(colored_constraints["purple"]):<3}',
-        }
-    for color, name in legend_names.items():
-        h = matplotlib.patches.Patch(color=color, label=name)
+    legend_labels = [
+            'True Positives {}',
+            'True Positives wrong type {}',
+            'False Positives {}',
+            'False Negatives {}',
+            'False Negatives wrong type {}',
+            'Given {}',
+    ]
+
+    for i, (category, color) in enumerate(COLOR_MAP.items()):
+        legend_label = legend_labels[i].format(len(d_categories[category]))
+        h = matplotlib.patches.Patch(color=color, label=legend_label)
         handles.append(h)
     legend = ax.legend(handles=handles, loc='upper left')
+    return legend
 
-def display_specific_constraint(sketch, pred: EvalPrediction, request, legend=True, hide_tp=True):
+def display_specific_constraint(sketch: Sketch, pred: EvalPrediction, request=-1, legend=True, hide_tp=True, hide_given=True):
     """
     Same as display_inference but only a specific constraint is highlighted
     Extra information is shown
     """
-    if isinstance(request,int):
-        l_idx_constraint = [request]
 
     fig, ax = plt.subplots(figsize=(10, 10))
     render_sketch(sketch, ax)
-    d_constr_pred, d_constr_gt = PredictionToCastor.get_sorted_constraints(sketch, pred)
+    d_categories = pred.d_categories
+    l_constraints = PredictionToCastor.get_constraints(sketch, pred)
 
-    colored_constraints = {k:d_constr_pred[v] for k,v in COLOR_MAP.items()}
     if legend:
-        add_legend(colored_constraints,ax)
-
-    ### Highlights
-    if hide_tp:
-        d_constr_pred['true_positives'] = []
+        add_legend(d_categories,ax)
 
     xmin, xmax = ax.get_xlim()
     ax.set_xlim(xmin,xmax+0.3)
     xtext = xmax
     ytext = ax.get_ylim()[1] - 0.04
-    idx = 0
-    for color, key in COLOR_MAP.items():
-        l_constr_pred = d_constr_pred.get(key)
-        l_constr_gt = d_constr_gt.get(key)
-        for j, constraint in enumerate(l_constr_pred):
+    list_idx = 0
+    for category, l_indexes in d_categories.items():
+        if category == 'true_negatives' or (category == 'true_positives' and hide_tp) or (category == 'given' and hide_given):
+            continue
+        color = COLOR_MAP[category]
+        y_offset = OFFSET_MAP[category]
+        for idx in l_indexes:
+            constraint = l_constraints[idx]
+            if constraint == 'Subnode':
+                continue
+
             # highlight
-            if idx in l_idx_constraint:
-                text = constraint.type.name
-                font = 'bold'
-                if l_constr_gt is not None:
-                    gt_constraint = l_constr_gt[j]
-                    text += f' (gt = {gt_constraint.type.name})'
-                y_offset = OFFSET_MAP[color]
+            if list_idx == request:
                 highlight_constraint(constraint, color=color, ax=ax, color_prim=True, y_offset=y_offset)
+            elif request == -1:
+                highlight_constraint(constraint, color=color, ax=ax, color_prim=False, y_offset=y_offset)
+            # generate text list
+            info = pred[idx]
+            if list_idx == request:
+                text = constraint.type.name
+                score = info.get("predicted_sigmoid")
+                if score:
+                    text += f' confidence={score:.2f}'
+                font = 'bold'
+                if '_wrong_type' in category:
+                    true_name = info['true_type_name']
+                    text += f' (gt = {true_name})'
             else:
                 text = constraint.type.name.lower()
                 font = 'regular'
 
-            #generate text list
             ax.text(xtext, ytext, text, ha="center", va="center", rotation=0,
                 size=15, color=color, fontweight=font)
             ytext -= 0.04
-            idx+=1
+            list_idx+=1
 
+    return fig, ax

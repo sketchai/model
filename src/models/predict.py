@@ -80,7 +80,7 @@ class PredictSketch(pl.LightningModule):
         if tp>0:
             precision = tp / (tp + fp)
             recall = tp / (tp + fn)
-            accuracy = (tp + fn) / (tp + fn + tn + fp)
+            accuracy = (tp + tn) / (tp + fn + tn + fp)
             self.log(f'{tag}/bin_accuracy', accuracy)
             self.log(f'{tag}/bin_precision', precision)
             self.log(f'{tag}/bin_recall',recall)
