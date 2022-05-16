@@ -16,9 +16,8 @@ class SubnodeConstraint(Constraint):
 def format_for_encoding(ops):
     """Adds Subnodes and reference indexes to the sequence"""
     new_sequence = []
-    new_sequence_ = []
     primitive_ops = [op for op in ops if isinstance(op, Primitive)]
-    current_subnode_index = len(primitive_ops)
+    # current_subnode_index = len(primitive_ops)
     current_node_index = 0
     for op in ops:
         new_sequence.append(op)
@@ -27,19 +26,18 @@ def format_for_encoding(ops):
             current_node_index+=1
             if isinstance(op, Line) or isinstance(op, Arc):
                 op.pnt1.subnode_type = 'SN_pnt1'
-                op.pnt1.node_index = current_subnode_index
+                op.pnt1.node_index = current_node_index
                 constraint1 = SubnodeConstraint(references=[op,op.pnt1])
                 op.pnt2.subnode_type = 'SN_pnt2'
-                op.pnt2.node_index = current_subnode_index + 1
+                op.pnt2.node_index = current_node_index + 1
                 constraint2 = SubnodeConstraint(references=[op,op.pnt2])
-                new_sequence_.extend([op.pnt1, constraint1, op.pnt2, constraint2])
-                current_subnode_index += 2
+                new_sequence.extend([op.pnt1, constraint1, op.pnt2, constraint2])
+                current_node_index += 2
 
             if isinstance(op, Circle) or isinstance(op, Arc):
                 op.center.subnode_type = 'SN_center'
-                op.center.node_index = current_subnode_index
-                current_subnode_index += 1
+                op.center.node_index = current_node_index
+                current_node_index += 1
                 constraint = SubnodeConstraint(references=[op,op.center])
-                new_sequence_.extend([op.center,constraint])
-    new_sequence.extend(new_sequence_)
+                new_sequence.extend([op.center,constraint])
     return new_sequence
