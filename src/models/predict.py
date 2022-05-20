@@ -42,8 +42,12 @@ class PredictSketch(pl.LightningModule):
         prediction = self.model(batch)
 
         loss = GaT.loss(prediction, batch, coef_neg=self.coef_neg, weight_types=None)
+        edges_pos = prediction['edges_pos'].cpu().detach().numpy()
+        edges_neg = prediction['edges_neg'].cpu().detach().numpy()
         # Save loss
-        self.log('train_loss', loss, batch_size = batch['l_batch'])
+        self.log('train/loss', loss, batch_size = batch['l_batch'])
+        if self.global_step%100 == 0:
+            self.log_binary_classification(edges_pos, edges_neg, tag='train',batch_idx=batch_idx)
         return loss 
 
 
@@ -60,17 +64,16 @@ class PredictSketch(pl.LightningModule):
             predicted_type_neg = torch.argmax(prediction['type_neg'], dim=-1).cpu().detach().numpy()
             true_type = batch['edges_toInf_pos_types'].cpu().detach().numpy()
 
-        self.log('metric_to_track',loss)
-        self.log('val_loss', loss)
+        self.log('val/loss', loss)
 
         self.log_binary_classification(edges_pos, edges_neg, tag='val',batch_idx=batch_idx)
 
         self.log_multiclass(true_type, predicted_type_pos, tag='val',batch_idx=batch_idx)
 
-        if (self.current_epoch+1)%5==0 and batch_idx==0:
+        if (self.current_epoch in [5,15,49]) and batch_idx==0:
             self.log_embeddings(batch, tag='val')
 
-    def log_binary_classification(self, edges_pos, edges_neg, tag, batch_idx):
+    def log_binary_classification(self, edges_pos, edges_neg, tag, batch_idx, on_step=False, on_epoch=True):
         tensorboard = self.logger.experiment
         tp = np.sum(edges_pos > 0)
         fn = np.sum(edges_pos < 0)
@@ -81,9 +84,9 @@ class PredictSketch(pl.LightningModule):
             precision = tp / (tp + fp)
             recall = tp / (tp + fn)
             accuracy = (tp + tn) / (tp + fn + tn + fp)
-            self.log(f'{tag}/bin_accuracy', accuracy)
-            self.log(f'{tag}/bin_precision', precision)
-            self.log(f'{tag}/bin_recall',recall)
+            self.log(f'{tag}/bin_accuracy', accuracy, on_step=on_step, on_epoch=on_epoch)
+            self.log(f'{tag}/bin_precision', precision, on_step=on_step, on_epoch=on_epoch)
+            self.log(f'{tag}/bin_recall',recall, on_step=on_step, on_epoch=on_epoch)
 
         #TODO add aggregation (for now only one batch is used to compute the curve)
         if batch_idx==0:
@@ -106,7 +109,7 @@ class PredictSketch(pl.LightningModule):
                 display_labels=label_names)
             fig, ax = plt.subplots()
             disp.plot(ax=ax,xticks_rotation='vertical',include_values=False,)
-            tensorboard.add_figure('confusion_matrix',fig,global_step=self.global_step)
+            tensorboard.add_figure(f'{tag}/confusion_matrix',fig,global_step=self.global_step)
 
     def log_embeddings(self, batch,tag='',max_size=1000):
         node_features = batch['node_features'].detach().cpu().numpy()

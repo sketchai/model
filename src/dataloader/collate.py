@@ -41,10 +41,11 @@ def collect_batch(batch, node_elements, edge_elements, lMax, prop_max_edges_give
             batch_data.sparse_node_features[k]['value'].append(ex['sparse_node_features'][k]['value'])
 
         # Prepare a subgraph of constraints : given index edges are selected randomly among the constraint list
-        l = len(ex['i_edges_possible']) # compute the number of subnode constraints on the current ex 
+        l = len(ex['i_edges_possible']) # compute the number of non-subnode constraints on the current ex 
         n_max_edges_given = min(int(prop_max_edges_given * l), l - 2)
+        n_min_edges_given = int(n_max_edges_given*0.75)
         if l > 2:
-            curr_given_index_edges = RNG.choice(ex['i_edges_possible'], int(RNG.uniform(0, n_max_edges_given)), replace=False)
+            curr_given_index_edges = RNG.choice(ex['i_edges_possible'], int(RNG.uniform(n_min_edges_given, n_max_edges_given)), replace=False)
         else:
             curr_given_index_edges = np.array([], dtype=np.int64)
         curr_given_index_edges = np.concatenate([curr_given_index_edges, ex['i_edges_given']])
