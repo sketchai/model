@@ -280,7 +280,7 @@ def filter_edges_for_visu(pred,hide_tp=True, hide_given=True, categories=None, s
         l_indexes.extend(idxes)
 
     if sort:
-        l_indexes = sorted(l_indexes, key= lambda i: -pred[i].get('predicted_sigmoid') or 2)
+        l_indexes = sorted(l_indexes, key= lambda i: pred[i].get('predicted_sigmoid') or -1, reverse=True)
 
     return l_indexes
 
