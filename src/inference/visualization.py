@@ -3,10 +3,10 @@ import matplotlib.patches
 import matplotlib.pyplot as plt
 from src.inference.castor import PredictionToCastor
 from src.inference.eval import EvalPrediction
-from sketch_data.sketch import Sketch
-from sketch_data.primitive import Primitive
-from sketch_data.constraint import Constraint
-from sketch_data.catalog_primitive import Line, Point, Circle, Arc
+from sam.sketch import Sketch
+from sam.primitive import Primitive
+from sam.constraint import Constraint
+from sam.catalog_primitive import Line, Point, Circle, Arc
 
 PARENT_COLOR = {
     'green': 'lightgreen',
@@ -68,7 +68,7 @@ def render_sketch(sketch: Sketch, ax: plt.Axes) -> None:
 def render_prim(prim: Primitive, ax: plt.Axes, color='black', linewidth=1) -> None:
     """
     Renders a given primitive
-    This function wraps the plot method of the sketch_data module
+    This function wraps the plot method of the sam module
     it adds linewidth support and does not plot pnt1 and pnt2
     """
     if isinstance(prim, Primitive):

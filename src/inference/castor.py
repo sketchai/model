@@ -1,8 +1,8 @@
 from unicodedata import category
-from sketch_data.catalog_constraint import Horizontal, Vertical, Parallel, Length, Coincident, Perpendicular, Distance, Radius, Tangent, Midpoint, Equal, Angle, HorizontalLength, VerticalLength
-from sketch_data.constraint import Constraint
-from sketch_data.sketch import Sketch
-from sketch_data.primitive import Primitive
+from sam.catalog_constraint import Horizontal, Vertical, Parallel, Length, Coincident, Perpendicular, Distance, Radius, Tangent, Midpoint, Equal, Angle, HorizontalLength, VerticalLength
+from sam.constraint import Constraint
+from sam.sketch import Sketch
+from sam.primitive import Primitive
 from src.utils.format_encoding import format_for_encoding
 from src.utils.logger import logger
 from src.inference.eval import EvalPrediction
@@ -29,7 +29,7 @@ class PredictionToCastor:
 
     def get_constraints(sketch: Sketch, pred: EvalPrediction)->dict:
         """
-        returns sketch_data constraints (except true negatives)
+        returns sam constraints (except true negatives)
 
         note that for '_wrong_type' categories, the constraint type
         is the one predicted, not the ground truth
