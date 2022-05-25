@@ -3,7 +3,7 @@ import pytorch_lightning as pl
 import torch
 import os 
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger()
 
 
@@ -68,10 +68,10 @@ logger_tensorboard = TensorBoardLogger(save_dir = logger_conf.get('save_dir'), n
 scheduler = schedule(wait=1, warmup=2, active=8)
 profiler = PyTorchProfiler(profile_memory=True,export_to_chrome=True,schedule=scheduler)
 
-checkpoint_callback = ModelCheckpoint(monitor='val_loss',
-                                        dirpath=logger_conf.get('save_dir'),
+checkpoint_callback = ModelCheckpoint(monitor='val/loss',
+                                        # dirpath=logger_conf.get('save_dir'),
                                         filename='gat-{epoch:02d}-{val_loss:.2f}',
-                                        mode="max",
+                                        mode="min",
                                         save_weights_only=True)
 if __name__=='__main__':
     trainer = pl.Trainer(
@@ -79,13 +79,12 @@ if __name__=='__main__':
         # devices=4,
         # strategy='ddp',
         gpus=1,
-        max_epochs=200, 
+        max_epochs=50, 
         # progress_bar_refresh_rate=20, 
         logger=logger_tensorboard,
-        limit_train_batches=2000,
-        limit_val_batches=1,
-        # val_percent_check=0,
-        # callbacks=[checkpoint_callback],
+        # limit_train_batches=2000,
+        # limit_val_batches=1,
+        callbacks=[checkpoint_callback],
         # profiler=profiler,
     )
     logger.info('-- Logger and Trainer initialization: end')

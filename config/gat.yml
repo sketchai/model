@@ -1,28 +1,27 @@
 experiment:
-  dir: /home/i37181/Documents/Projets/CAO/SketchGraphs/modelrnn_gat/tests/asset/dataset/val
-
+  dir: data/
 logger:
-  save_dir : 'experiment/results'
+  save_dir : ''
   name : 'gat_logs'
 
 train_data: # Train data related parameters
-  num_workers: 1
-  file_data: "sg_validation_final.npy" # "sg_t16_validation_final.npy"  #folder or file name (should end with .npy)
-  file_weights: "sg_validation_weights.npy"  # "sg_t16_validation_weights.npy" # 
+  num_workers: 12
+  file_data: "sg_merged_final_train.npy" #folder or file name (should end with .npy)
+  file_weights: "sg_merged_weights_train.npy"  
 
 
-val_data: # Test data related parameters
-    num_workers: 1
+val_data: # test data related parameters
+    num_workers: 12
     num_batch_eval: 20
-    file_data: "sg_validation_final.npy"
-    file_weights: "sg_validation_weights.npy"
+    file_data: "sg_merged_final_test.npy"
+    file_weights: "NOT USED"
     coef_neg: 1.
 
 train:
     cpu: False
     file_prep_parms: "preprocessing_params.pkl" #"preprocessing_params.pkl" # 
-    batch_size: 8
-    prop_max_edges_given: 0.1
+    batch_size: 128
+    prop_max_edges_given: 0.9
 
 optimizer:
     lr: !!float 5e-4

@@ -22,9 +22,12 @@ def collect_batch(batch, node_elements, edge_elements, lMax, prop_max_edges_give
     batch_data.edges_toInf_neg = []
     batch_data.src_key_padding_mask = []
     batch_data.given_index_edges = []
+    batch_data.sequence_idx = []
 
     for n, ex in enumerate(batch):
         shift = n * lMax
+
+        batch_data.sequence_idx.append(ex['sequence_idx'])
 
         # node_features
         batch_data.node_features.append(ex['node_features'])
@@ -38,10 +41,11 @@ def collect_batch(batch, node_elements, edge_elements, lMax, prop_max_edges_give
             batch_data.sparse_node_features[k]['value'].append(ex['sparse_node_features'][k]['value'])
 
         # Prepare a subgraph of constraints : given index edges are selected randomly among the constraint list
-        l = len(ex['i_edges_possible']) # compute the number of subnode constraints on the current ex 
+        l = len(ex['i_edges_possible']) # compute the number of non-subnode constraints on the current ex 
         n_max_edges_given = min(int(prop_max_edges_given * l), l - 2)
+        n_min_edges_given = int(n_max_edges_given*0.75)
         if l > 2:
-            curr_given_index_edges = RNG.choice(ex['i_edges_possible'], int(RNG.uniform(0, n_max_edges_given)), replace=False)
+            curr_given_index_edges = RNG.choice(ex['i_edges_possible'], int(RNG.uniform(n_min_edges_given, n_max_edges_given)), replace=False)
         else:
             curr_given_index_edges = np.array([], dtype=np.int64)
         curr_given_index_edges = np.concatenate([curr_given_index_edges, ex['i_edges_given']])
@@ -88,6 +92,7 @@ def collate(batch, node_feature_dims, edge_feature_dims, edge_idx_map,  lMax, pr
     batch = tensors_from_numpy(batch)
     batch_data = collect_batch(batch, node_feature_dims.keys(), edge_feature_dims.keys(),lMax, prop_max_edges_given)
 
+    batch_data.sequence_idx = torch.tensor(batch_data.sequence_idx,dtype=torch.int64)
     batch_data.node_features = torch.cat(batch_data.node_features)
     for key in batch_data.sparse_node_features.keys():
         batch_data.sparse_node_features[key]['index'] = torch.cat(batch_data.sparse_node_features[key]['index'])
@@ -133,7 +138,8 @@ def collate(batch, node_feature_dims, edge_feature_dims, edge_idx_map,  lMax, pr
         'edges_toInf_neg': batch_data.edges_toInf_neg,
         'src_key_padding_mask': torch.vstack(batch_data.src_key_padding_mask) if mask_attention else None,
         'positions': torch.arange(lMax),
-        'is_given': batch_data.given_index_edges if generation else None  # np.ndarray cannot be moved to gpu
+        'is_given': batch_data.given_index_edges if generation else None,  # np.ndarray cannot be moved to gpu
+        'sequence_idx': batch_data.sequence_idx
     })
 
 def tensors_from_numpy(batch):
