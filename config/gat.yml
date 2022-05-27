@@ -5,31 +5,30 @@ logger:
   name : 'gat_logs'
 
 train_data: # Train data related parameters
-  num_workers: 12
+  num_workers: 48
   file_data: "sg_merged_final_train.npy" #folder or file name (should end with .npy)
   file_weights: "sg_merged_weights_train.npy"  
 
 
-val_data: # test data related parameters
-    num_workers: 12
-    num_batch_eval: 20
-    file_data: "sg_merged_final_test.npy"
-    file_weights: "NOT USED"
-    coef_neg: 1.
+val_data: # val data related parameters
+  num_workers: 48
+  file_data: "sg_merged_final_val.npy"
+  file_weights: "NOT USED"
+  coef_neg: 1.
 
 train:
-    cpu: False
-    file_prep_parms: "preprocessing_params.pkl" #"preprocessing_params.pkl" # 
-    batch_size: 128
-    prop_max_edges_given: 0.9
+  cpu: False
+  file_prep_parms: "preprocessing_params.pkl" #"preprocessing_params.pkl" # 
+  batch_size: 4096
+  prop_max_edges_given: 0.9
 
 optimizer:
-    lr: !!float 5e-4
-    scheduler_step: 2
+  lr: !!float 5e-4
+  scheduler_step: 2
 
 model: # Architecture and model
-    n_head: 4
-    num_layers: 2
-    embedding_dim : 240
-    positional_encoding: True
+  n_head: 4
+  num_layers: 2
+  embedding_dim : 240
+  positional_encoding: False
 
