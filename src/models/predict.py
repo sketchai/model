@@ -34,7 +34,7 @@ class PredictSketch(pl.LightningModule):
         adam_optimizer = torch.optim.Adam(self.model.parameters(), lr=self.d_optimizer.get('lr'))
         optimizers = [adam_optimizer]
         lr_schedulers = {"scheduler": torch.optim.lr_scheduler.ReduceLROnPlateau(adam_optimizer, factor=0.5, patience=self.d_optimizer.get('scheduler_step')), 
-                         "monitor": "metric_to_track"}
+                         "monitor": "val/loss"}
         return optimizers, lr_schedulers
 
 
