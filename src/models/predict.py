@@ -12,6 +12,7 @@ except ModuleNotFoundError:
     confusion_matrix = None
 
 from src.models.gat import GaT
+from src.utils.to_dict import stack_hparams
 
 logging.getLogger('matplotlib').setLevel(logging.WARNING)
 logging.basicConfig(level=logging.DEBUG)
@@ -23,11 +24,10 @@ class PredictSketch(pl.LightningModule):
         super().__init__()
         self.model = model
         self.d_optimizer = conf.get('optimizer')
-
-        d_validation = conf.get('val_data')
-        self.coef_neg = d_validation.get('coef_neg')
+        self.coef_neg = self.d_optimizer.get('coef_neg')
         self.edge_idx_map = conf.get('edge_idx_map')
         self.node_idx_map = conf.get('node_idx_map')
+        self.save_hyperparameters(stack_hparams(conf))
     
 
     def configure_optimizers(self):
