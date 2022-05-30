@@ -45,7 +45,11 @@ logger.info('-- Model initialization: end')
 ######## STEP 3 : Init Trainer
 logger.info('-- Logger and Trainer initialization:...')
 logger_conf = conf.get('logger')
-logger_tensorboard = TensorBoardLogger(save_dir = logger_conf.get('save_dir'), name = logger_conf.get('name'), log_graph=False)
+logger_tensorboard = TensorBoardLogger(
+    save_dir = logger_conf.get('save_dir'),
+    name = logger_conf.get('name'),
+    log_graph=False,
+    default_hp_metric=False)
 scheduler = schedule(wait=1, warmup=2, active=8)
 profiler = PyTorchProfiler(profile_memory=True,export_to_chrome=True,schedule=scheduler)
 

@@ -38,6 +38,10 @@ class PredictSketch(pl.LightningModule):
         return optimizers, lr_schedulers
 
 
+    def on_train_start(self):
+        self.logger.log_hyperparams(self.hparams, {"hp/val_loss": 0})
+
+
     def training_step(self, batch, batch_idx):
         prediction = self.model(batch)
 
@@ -65,6 +69,7 @@ class PredictSketch(pl.LightningModule):
             true_type = batch['edges_toInf_pos_types'].cpu().detach().numpy()
 
         self.log('val/loss', loss)
+        self.log('hp/val_loss', loss)
 
         self.log_binary_classification(edges_pos, edges_neg, tag='val',batch_idx=batch_idx)
 
