@@ -27,6 +27,7 @@ class PredictSketch(pl.LightningModule):
         self.coef_neg = self.d_optimizer.get('coef_neg')
         self.edge_idx_map = conf.get('edge_idx_map')
         self.node_idx_map = conf.get('node_idx_map')
+        self.max_epochs = conf['train']['max_epochs']
         self.save_hyperparameters(stack_hparams(conf))
     
 
@@ -46,12 +47,16 @@ class PredictSketch(pl.LightningModule):
         prediction = self.model(batch)
 
         loss = GaT.loss(prediction, batch, coef_neg=self.coef_neg, weight_types=None)
-        edges_pos = prediction['edges_pos'].cpu().detach().numpy()
-        edges_neg = prediction['edges_neg'].cpu().detach().numpy()
         # Save loss
         self.log('train/loss', loss, batch_size = batch['l_batch'])
-        if self.global_step%100 == 0:
+        if batch_idx%100 == 0:
+            edges_pos = prediction['edges_pos'].cpu().detach().numpy()
+            edges_neg = prediction['edges_neg'].cpu().detach().numpy()
             self.log_binary_classification(edges_pos, edges_neg, tag='train',batch_idx=batch_idx)
+            #TODO add aggregation (for now only one batch is used to compute the curve)
+            frequency = self.max_epochs//10
+            if batch_idx==0 and self.current_epoch%frequency==0:
+                self.log_pr_curve(self, edges_pos, edges_neg, tag='train')
         return loss 
 
 
@@ -78,6 +83,11 @@ class PredictSketch(pl.LightningModule):
         if (self.current_epoch in [5,15,49]) and batch_idx==0:
             self.log_embeddings(batch, tag='val')
 
+        #TODO add aggregation (for now only one batch is used to compute the curve)
+        frequency = self.max_epochs//10
+        if batch_idx==0 and self.current_epoch%frequency==0:
+            self.log_pr_curve(self, edges_pos, edges_neg, tag='val')
+
     def log_binary_classification(self, edges_pos, edges_neg, tag, batch_idx, on_step=False, on_epoch=True):
         tensorboard = self.logger.experiment
         tp = np.sum(edges_pos > 0)
@@ -93,12 +103,11 @@ class PredictSketch(pl.LightningModule):
             self.log(f'{tag}/bin_precision', precision, on_step=on_step, on_epoch=on_epoch)
             self.log(f'{tag}/bin_recall',recall, on_step=on_step, on_epoch=on_epoch)
 
-        #TODO add aggregation (for now only one batch is used to compute the curve)
-        if batch_idx==0:
-            label = np.concatenate([np.ones([len(edges_pos)]), np.zeros([len(edges_neg)])], axis = 0)
-            scalar_pred = np.concatenate([edges_pos,edges_neg], axis = 0).flatten()
-            predictions = 1 / (1 + np.exp(-scalar_pred))
-            tensorboard.add_pr_curve(f'{tag}/pr_curve', label, predictions,global_step=self.global_step)
+    def log_pr_curve(self, edges_pos, edges_neg, tag):
+        label = np.concatenate([np.ones([len(edges_pos)]), np.zeros([len(edges_neg)])], axis = 0)
+        scalar_pred = np.concatenate([edges_pos,edges_neg], axis = 0).flatten()
+        predictions = 1 / (1 + np.exp(-scalar_pred))
+        tensorboard.add_pr_curve(f'{tag}/pr_curve', label, predictions,global_step=self.global_step)
 
     def log_multiclass(self,true_type, predicted_type, tag, batch_idx):
         tensorboard = self.logger.experiment

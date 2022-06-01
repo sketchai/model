@@ -19,7 +19,7 @@ val_data: # val data related parameters
 train:
   batch_size: 4096
   prop_max_edges_given: 0.9
-  max_epochs: 50
+  max_epochs: 200
 
 optimizer:
   lr: !!float 5e-4
@@ -30,5 +30,5 @@ model: # Architecture and model
   n_head: 4
   num_layers: 2
   embedding_dim : 240
-  positional_encoding: False
+  positional_encoding: True
 
