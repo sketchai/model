@@ -11,7 +11,7 @@ logger = logging.getLogger()
 import sys 
 sys.path.append('/home/i37181/Documents/Projets/CAO/SketchGraphs/sketchgraphs')
 
-from src.dataloader.graph_data import GraphDataset
+from sketch_gnn.dataloader.graph_data import GraphDataset
 
 
 import sys 

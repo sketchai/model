@@ -3,8 +3,8 @@ import logging
 import torch
 import enum
 
-from src.models.numerical_features.generator import generate_embedding
-from src.models.numerical_features.encoding import NumericalFeatureEncoding
+from sketch_gnn.models.numerical_features.generator import generate_embedding
+from sketch_gnn.models.numerical_features.encoding import NumericalFeatureEncoding
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger()

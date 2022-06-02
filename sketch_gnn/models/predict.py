@@ -11,8 +11,8 @@ try:
 except ModuleNotFoundError:
     confusion_matrix = None
 
-from src.models.gat import GaT
-from src.utils.to_dict import stack_hparams
+from sketch_gnn.models.gat import GaT
+from sketch_gnn.utils.to_dict import stack_hparams
 
 logging.getLogger('matplotlib').setLevel(logging.WARNING)
 logging.basicConfig(level=logging.DEBUG)

@@ -3,8 +3,8 @@ import logging
 import functools
 from typing import Dict
 
-from src.dataloader.load import generate_dataset
-from src.dataloader.collate import collate 
+from sketch_gnn.dataloader.load import generate_dataset
+from sketch_gnn.dataloader.collate import collate 
 
 
 logging.basicConfig(level=logging.DEBUG)

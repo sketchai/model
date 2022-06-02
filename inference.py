@@ -9,7 +9,7 @@ logger = logging.getLogger()
 import sys
 
 # Load the model
-from src.models.gat import GaT
+from sketch_gnn.models.gat import GaT
 
 logger.info('-- Model initialization:...')
 
@@ -17,7 +17,7 @@ logger.info('-- Model initialization:...')
 import sys
 
 ######## STEP 1 : Import Datasets
-from src.utils.to_dict import yaml_to_dict
+from sketch_gnn.utils.to_dict import yaml_to_dict
 conf = yaml_to_dict('config/gat_inf.yml')
 
 # update path
@@ -61,7 +61,7 @@ d_train = conf.get('train')
 with open(d_train.get('prep_parms_path'), 'rb') as f:
     d_prep = pickle.load(f)
 # Add node_idx_map and edge_idx_map (must be placed directly into the preprocessing files)
-from src.dataloader.generate_dataModule import SketchGraphDataModule
+from sketch_gnn.dataloader.generate_dataModule import SketchGraphDataModule
 
 graph_dataset = SketchGraphDataModule(conf, d_prep)
 dataset = graph_dataset.val_dataloader()

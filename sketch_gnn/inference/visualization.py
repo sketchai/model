@@ -1,8 +1,8 @@
 from unicodedata import category
 import matplotlib.patches
 import matplotlib.pyplot as plt
-from src.inference.castor import PredictionToCastor
-from src.inference.eval import EvalPrediction
+from sketch_gnn.inference.castor import PredictionToCastor
+from sketch_gnn.inference.eval import EvalPrediction
 from sam.sketch import Sketch
 from sam.primitive import Primitive
 from sam.constraint import Constraint

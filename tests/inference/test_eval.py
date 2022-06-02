@@ -3,11 +3,11 @@ import os
 import pickle
 import numpy as np
 import torch
-from src.utils.logger import logger
-from src.utils.to_dict import yaml_to_dict
-from src.dataloader.generate_dataModule import SketchGraphDataModule
-from src.models.gat import GaT
-from src.inference.eval import EvalPrediction
+from sketch_gnn.utils.logger import logger
+from sketch_gnn.utils.to_dict import yaml_to_dict
+from sketch_gnn.dataloader.generate_dataModule import SketchGraphDataModule
+from sketch_gnn.models.gat import GaT
+from sketch_gnn.inference.eval import EvalPrediction
 
 class TestEvalPrediction(unittest.TestCase):
     def setUp(self):

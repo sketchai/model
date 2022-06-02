@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "deep_gat"
+name = "sketch_gnn"
 version = "0.1.0"
 description = ""
 authors = ["EDF - F.Robin"]

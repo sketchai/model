@@ -2,7 +2,7 @@ import unittest
 import logging
 import os
 import pickle
-from src.utils.to_dict import yaml_to_dict
+from sketch_gnn.utils.to_dict import yaml_to_dict
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger()
@@ -10,7 +10,7 @@ logger = logging.getLogger()
 import sys 
 sys.path.append('/home/i37181/Documents/Projets/CAO/SketchGraphs/sketchgraphs')
 
-from src.dataloader.generate_dataModule import SketchGraphDataModule
+from sketch_gnn.dataloader.generate_dataModule import SketchGraphDataModule
 
 class TestSketchGraphDataModule(unittest.TestCase):
 

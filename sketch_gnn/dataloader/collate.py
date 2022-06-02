@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 
-from src.dataloader.batch_data import GraBatch
+from sketch_gnn.dataloader.batch_data import GraBatch
 
 import logging
 logging.basicConfig(level=logging.DEBUG)
@@ -51,7 +51,7 @@ def collect_batch(batch, node_elements, edge_elements, lMax, prop_max_edges_give
         curr_given_index_edges = np.concatenate([curr_given_index_edges, ex['i_edges_given']])
         batch_data.given_index_edges.append(curr_given_index_edges)
 
-        batch_data.incidences.append(ex['incidences'][curr_given_index_edges] + shift) # pourquoi ne pas avoir une vrai matrice d'incidences ? 
+        batch_data.incidences.append(ex['incidences'][curr_given_index_edges] + shift) # pourquoi ne pas avoir une vraie matrice d'incidences ? 
         batch_data.edge_features.append(ex['edge_features'][curr_given_index_edges])
 
         curr_given_index_edges = torch.tensor(curr_given_index_edges).unsqueeze(0)
@@ -119,11 +119,6 @@ def collate(batch, node_feature_dims, edge_feature_dims, edge_idx_map,  lMax, pr
         batch_data.edges_toInf_pos_types = torch.empty((0,), dtype=torch.int64).contiguous()
         batch_data.edges_toInf_neg = torch.empty((0, 2), dtype=torch.int64)
 
-
-    #batch_data.l_batch = len(batch)
-    #batch_data.given_index_edges = batch_data.given_index_edges if generation else None
-    #batch_data.positions = torch.arange(lMax)
-    #batch_data.src_key_padding_mask = torch.vstack(batch_data.src_key_padding_mask) if mask_attention else None
 
     return(
         {

@@ -3,14 +3,14 @@ import unittest
 import logging
 import torch
 import pickle
-from src.utils.to_dict import yaml_to_dict
+from sketch_gnn.utils.to_dict import yaml_to_dict
 
 
 
-from src.models.dense_emb import DenseSparsePreEmbedding
+from sketch_gnn.models.dense_emb import DenseSparsePreEmbedding
 
-from src.models.gat import GaT
-from src.dataloader.generate_dataModule import SketchGraphDataModule
+from sketch_gnn.models.gat import GaT
+from sketch_gnn.dataloader.generate_dataModule import SketchGraphDataModule
 
 
 

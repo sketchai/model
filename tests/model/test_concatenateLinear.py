@@ -2,7 +2,7 @@ import unittest
 import logging
 import torch
 
-from src.models.concatenatelinear import ConcatenateLinear
+from sketch_gnn.models.concatenatelinear import ConcatenateLinear
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger()

@@ -1,7 +1,7 @@
 import torch
 from typing import Dict 
 
-from src.dataloader.graph_data import GraphDataset
+from sketch_gnn.dataloader.graph_data import GraphDataset
 
 import logging
 logging.basicConfig(level=logging.DEBUG)
