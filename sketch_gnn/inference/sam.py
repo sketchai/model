@@ -25,7 +25,7 @@ NAME_TO_CONSTRAINT_MAP = {
     'VERTICAL_LENGTH': VerticalLength,
 }
 
-class PredictionToCastor:
+class PredictionToSam:
 
     def get_constraints(sketch: Sketch, pred: EvalPrediction)->dict:
         """
