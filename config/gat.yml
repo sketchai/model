@@ -16,6 +16,10 @@ val_data: # val data related parameters
   num_workers: 48
   file_data: "sg_merged_final_val.npy"
 
+test_data: # test data related parameters
+  num_workers: 48
+  file_data: "sg_merged_final_test.npy"
+
 train:
   batch_size: 4096
   prop_max_edges_given: 0.9

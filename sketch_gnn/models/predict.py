@@ -64,13 +64,13 @@ class PredictSketch(pl.LightningModule):
         # result = pl.EvalResult()
 
         with torch.no_grad():
-            prediction = self.model(batch)
+            output = self.model(batch)
             l_batch = batch['l_batch']
-            loss = GaT.loss(prediction, batch, coef_neg=self.coef_neg, weight_types=None).item()
-            edges_pos = prediction['edges_pos'].cpu().detach().numpy()
-            edges_neg = prediction['edges_neg'].cpu().detach().numpy()
-            predicted_type_pos = torch.argmax(prediction['type'], dim=-1).cpu().detach().numpy()
-            predicted_type_neg = torch.argmax(prediction['type_neg'], dim=-1).cpu().detach().numpy()
+            loss = GaT.loss(output, batch, coef_neg=self.coef_neg, weight_types=None).item()
+            edges_pos = output['edges_pos'].cpu().detach().numpy()
+            edges_neg = output['edges_neg'].cpu().detach().numpy()
+            predicted_type_pos = torch.argmax(output['type'], dim=-1).cpu().detach().numpy()
+            predicted_type_neg = torch.argmax(output['type_neg'], dim=-1).cpu().detach().numpy()
             true_type = batch['edges_toInf_pos_types'].cpu().detach().numpy()
 
         self.log('val/loss', loss)

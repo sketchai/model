@@ -1,35 +1,37 @@
 experiment:
   dir: '.'
 
+file_prep_parms: "tests/asset/dataset/mini_example/preprocessing_params.pkl" #"preprocessing_params.pkl" # 
 logger:
   save_dir : 'tests/asset/output'
   name : 'gat_logs'
+  hparams_to_save: ['train', 'optimizer', 'model']
 
 train_data: # Train data related parameters
   num_workers: 1
-  file_data: "tests/asset/dataset/mini_example/mini_final.npy" # "sg_t16_validation_final.npy"  #folder or file name (should end with .npy)
-  file_weights: "tests/asset/dataset/mini_example/mini_weights.npy"  # "sg_t16_validation_weights.npy" # 
+  file_data: "tests/asset/dataset/mini_example/mini_final.npy" 
+  file_weights: "tests/asset/dataset/mini_example/mini_weights.npy" 
 
+val_data: # Val data related parameters
+  num_workers: 1
+  file_data: "tests/asset/dataset/mini_example/mini_final.npy"
 
-val_data: # Test data related parameters
-    num_workers: 1
-    num_batch_eval: 20
-    file_data: "tests/asset/dataset/mini_example/mini_final.npy"
-    file_weights: "tests/asset/dataset/mini_example/mini_weights.npy"
-    coef_neg: 1.
+test_data: # Test data related parameters
+  num_workers: 1
+  file_data: "tests/asset/dataset/mini_example/mini_final.npy"
 
 train:
-    cpu: False
-    file_prep_parms: "tests/asset/dataset/mini_example/preprocessing_params.pkl" #"preprocessing_params.pkl" # 
-    batch_size: 8
-    prop_max_edges_given: 0.1
+  batch_size: 8
+  prop_max_edges_given: 0.1
+  max_epochs: 100
 
 optimizer:
-    lr: !!float 5e-4
-    scheduler_step: 2
+  lr: !!float 5e-4
+  scheduler_step: 2
+  coef_neg: 1.
 
 model: # Architecture and model
-    n_head: 4
-    num_layers: 2
-    embedding_dim : 240
-    positional_encoding: True
+  n_head: 4
+  num_layers: 2
+  embedding_dim : 240
+  positional_encoding: True
