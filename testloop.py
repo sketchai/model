@@ -8,6 +8,7 @@ python sketch_gnn/utils/find_best_thr.py --path path/to/your model
 import logging 
 import pytorch_lightning as pl
 import pickle
+import numpy as np
 from argparse import ArgumentParser
 from sketch_gnn.utils.to_dict import parse_config
 from sketch_gnn.dataloader.generate_dataModule import SketchGraphDataModule
@@ -19,6 +20,7 @@ if __name__=='__main__':
     parser = ArgumentParser()
     parser.add_argument('--path', help= 'path to your model checkpoint')
     parser.add_argument('--thr', default=0.98, help='threshold used for evaluation', type=float)
+    parser.add_argument('--prop', help='prop of edges given', type=float, required=False)
 
     args = parser.parse_args()
     ######## STEP 1 : Init Datasets
@@ -27,8 +29,6 @@ if __name__=='__main__':
     d_train = conf.get('train')
     with open(conf.get('prep_parms_path'), 'rb') as f:
         preprocessing_params = pickle.load(f)
-    # Create DataLoader
-    data = SketchGraphDataModule(conf,preprocessing_params)
 
     ######## STEP 2 : Init Model
     logger.info('-- Model initialization:...')
@@ -54,8 +54,10 @@ if __name__=='__main__':
         callbacks=[],
         logger=False,
         )
+    prop = args.prop or conf['test_data']['prop_max_edges_given']
+    data = SketchGraphDataModule(conf,preprocessing_params)
     _ = trainer.test(sketchPredictionmodel, dataloaders=data.test_dataloader())
     
     results = sketchPredictionmodel.test_results
     avg_precision, avg_recall = sketch_wise_precision_recall(results, thr=args.thr)
-    print(f'avg precision = {avg_precision:0.3}, avg_recall = {avg_recall:0.3}')
+    print(f'Prop hidden: {prop:0.2}, avg precision = {avg_precision:0.3}, avg_recall = {avg_recall:0.3}')

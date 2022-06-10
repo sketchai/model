@@ -7,8 +7,8 @@ from sketch_gnn.dataloader.load import generate_dataset
 from sketch_gnn.dataloader.collate import collate 
 
 
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger()
+
+from sketch_gnn.utils.logger import logger
 
 class SketchGraphDataModule(pl.LightningDataModule):
     def __init__(self,conf: Dict = None, preprocessing_params:Dict = {}):
@@ -23,19 +23,30 @@ class SketchGraphDataModule(pl.LightningDataModule):
         self.collate_fn = functools.partial(collate, node_feature_dims=preprocessing_params.get('node_feature_dimensions'),
                                         edge_feature_dims=preprocessing_params.get('edge_feature_dimensions'),
                                         edge_idx_map = preprocessing_params.get('edge_idx_map'),
-                                        lMax=preprocessing_params.get('lMax'),
-                                        prop_max_edges_given=conf.get('train').get('prop_max_edges_given'))
+                                        lMax=preprocessing_params.get('lMax'))
 
 
     def train_dataloader(self):
         logger.info('-- Load Train Set')
-        return generate_dataset(conf=self.d_train, batch_size=self.batch_size, collate_fn=self.collate_fn)
+        collate_fn = functools.partial(
+            self.collate_fn,
+            prop_max_edges_given=self.d_train.get('prop_max_edges_given'),
+            variation=self.d_train.get('variation'))
+        return generate_dataset(conf=self.d_train, batch_size=self.batch_size, collate_fn=collate_fn)
 
     def val_dataloader(self):
         logger.info('-- Load Validation Set')
-        return generate_dataset(conf=self.d_val, batch_size=self.batch_size, collate_fn=self.collate_fn, sample=False)
+        collate_fn = functools.partial(
+            self.collate_fn,
+            prop_max_edges_given=self.d_val.get('prop_max_edges_given'),
+            variation=self.d_val.get('variation'))
+        return generate_dataset(conf=self.d_val, batch_size=self.batch_size, collate_fn=collate_fn, sample=False)
 
     def test_dataloader(self):
-        return generate_dataset(conf=self.d_test, batch_size=self.batch_size, collate_fn=self.collate_fn, sample=False)
+        collate_fn = functools.partial(
+            self.collate_fn,
+            prop_max_edges_given=self.d_test.get('prop_max_edges_given'),
+            variation=self.d_test.get('variation'))
+        return generate_dataset(conf=self.d_test, batch_size=self.batch_size, collate_fn=collate_fn, sample=False)
 
     # def test_dataloader(self): 

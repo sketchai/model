@@ -4,13 +4,13 @@ import torch
 from sketch_gnn.dataloader.batch_data import GraBatch
 
 import logging
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger()
+
+from sketch_gnn.utils.logger import logger
 
 RNG = np.random.default_rng()
 
 
-def collect_batch(batch, node_elements, edge_elements, lMax, prop_max_edges_given, inference):
+def collect_batch(batch, node_elements, edge_elements, lMax, prop_max_edges_given, variation, inference):
     batch_data = lambda : None
     batch_data.node_features = []
     batch_data.sparse_node_features = {k: {'index': [], 'value': []} for k in node_elements}
@@ -45,7 +45,7 @@ def collect_batch(batch, node_elements, edge_elements, lMax, prop_max_edges_give
         if inference:
             curr_given_index_edges = np.concatenate([ex['i_edges_possible'], ex['i_edges_given']])
         else:
-            curr_given_index_edges = select_edges(ex, prop_max_edges_given)
+            curr_given_index_edges = select_edges(ex, prop_max_edges_given, variation)
 
         batch_data.given_index_edges.append(curr_given_index_edges)
 
@@ -78,13 +78,13 @@ def collect_batch(batch, node_elements, edge_elements, lMax, prop_max_edges_give
         batch_data.n_edges_neg.append(len(edges_toInf_neg))
     return batch_data
 
-def select_edges(ex, prop_max_edges_given):
+def select_edges(ex,prop_max_edges_given, variation=0):
     """
     Prepare a subgraph of constraints : given index edges are selected randomly among the constraint list
     """
     l = len(ex['i_edges_possible']) # compute the number of non-subnode constraints on the current ex 
     n_max_edges_given = min(int(prop_max_edges_given * l), l - 2)
-    n_min_edges_given = int(n_max_edges_given*0.75)
+    n_min_edges_given = int(n_max_edges_given*(1-variation))
     if l > 2:
         curr_given_index_edges = RNG.choice(ex['i_edges_possible'], int(RNG.uniform(n_min_edges_given, n_max_edges_given)), replace=False)
     else:
@@ -93,7 +93,7 @@ def select_edges(ex, prop_max_edges_given):
     return curr_given_index_edges
 
 
-def collate(batch, node_feature_dims, edge_feature_dims, edge_idx_map,  lMax, prop_max_edges_given=0.9, inference=False, mask_attention=True):
+def collate(batch, node_feature_dims, edge_feature_dims, edge_idx_map,  lMax, prop_max_edges_given=0.9, inference=False, mask_attention=True, variation=0):
     """
     Function to collate examples in one batch.
     batch: list of examples;
@@ -105,7 +105,7 @@ def collate(batch, node_feature_dims, edge_feature_dims, edge_idx_map,  lMax, pr
     mask_attention: bool, to generate a mask on the padding nodes for the attention mecanism.
     """
     batch = tensors_from_numpy(batch)
-    batch_data = collect_batch(batch, node_feature_dims.keys(), edge_feature_dims.keys(),lMax, prop_max_edges_given, inference)
+    batch_data = collect_batch(batch, node_feature_dims.keys(), edge_feature_dims.keys(),lMax, prop_max_edges_given, variation=variation, inference=inference)
 
     batch_data.sequence_idx = torch.tensor(batch_data.sequence_idx,dtype=torch.int64)
     batch_data.node_features = torch.cat(batch_data.node_features)

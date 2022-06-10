@@ -1,22 +1,21 @@
+from collections import defaultdict
 from typing import Dict
 import numpy as np
 import pytorch_lightning as pl
 import logging
 import tensorboard
 import torch
+import matplotlib.pyplot as plt
 try:
     from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
-    import matplotlib.pyplot as plt
 
 except ModuleNotFoundError:
     confusion_matrix = None
 
+from sketch_gnn.inference.metrics import sketch_wise_precision_recall
 from sketch_gnn.models.gat import GaT
 from sketch_gnn.utils.to_dict import stack_hparams
-
-logging.getLogger('matplotlib').setLevel(logging.WARNING)
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger()
+from sketch_gnn.utils.logger import logger
 
 
 class PredictSketch(pl.LightningModule):
@@ -88,6 +87,24 @@ class PredictSketch(pl.LightningModule):
         if batch_idx==0 and self.current_epoch%frequency==0:
             self.log_pr_curve(edges_pos, edges_neg, tag='val')
             self.log_confusion_matrix(true_type, predicted_type_pos, tag='val')
+
+    @torch.no_grad()
+    def test_step(self, batch, batch_idx):
+        output = self.model(batch)
+        output['edges_toInf_pos_types'] = batch['edges_toInf_pos_types']
+        output['n_edges_pos'] = batch['n_edges_pos']
+        output['n_edges_neg'] = batch['n_edges_neg']
+        output = {k:v.cpu() for k,v in output.items()}
+        return output
+    
+    def test_epoch_end(self, outputs):
+        cat_outputs = defaultdict(list)
+        for output in outputs:
+            for key, value in output.items():
+                cat_outputs[key].append(value)
+        cat_outputs = {k:torch.cat(v).numpy() for k,v in cat_outputs.items()}
+        self.test_results = cat_outputs
+
 
     def log_binary_classification(self, edges_pos, edges_neg, tag, on_step=False, on_epoch=True):
         tp = np.sum(edges_pos > 0)
