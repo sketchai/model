@@ -4,8 +4,7 @@ import torch
 
 from sketch_gnn.models.concatenatelinear import ConcatenateLinear
 
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 
 class TestConcatenateLinear(unittest.TestCase):

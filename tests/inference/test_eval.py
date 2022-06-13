@@ -3,12 +3,13 @@ import os
 import pickle
 import numpy as np
 import torch
-from sketch_gnn.utils.logger import logger
+import logging
 from sketch_gnn.utils.to_dict import parse_config
 from sketch_gnn.dataloader.generate_dataModule import SketchGraphDataModule
 from sketch_gnn.models.gat import GaT
 from sketch_gnn.inference.eval import EvalPrediction
 
+logger = logging.getLogger(__name__)
 class TestEvalPrediction(unittest.TestCase):
     def setUp(self):
         

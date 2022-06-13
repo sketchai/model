@@ -3,8 +3,7 @@ from typing import Dict
 from .concatenatelinear import ConcatenateLinear
 
 import logging
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 class DenseSparsePreEmbedding(torch.nn.Module):
     """

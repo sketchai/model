@@ -3,7 +3,7 @@ import logging
 import os
 import pickle
 from sketch_gnn.utils.to_dict import parse_config
-from sketch_gnn.utils.logger import logger
+logger = logging.getLogger(__name__)
 
 from sketch_gnn.dataloader.generate_dataModule import SketchGraphDataModule
 

@@ -3,6 +3,7 @@ import pytorch_lightning as pl
 import torch
 import os 
 import pickle
+import sketch_gnn
 from sketch_gnn.utils.to_dict import parse_config
 from sketch_gnn.dataloader.generate_dataModule import SketchGraphDataModule
 from sketch_gnn.models.gat import GaT
@@ -13,8 +14,9 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 from torch.profiler import schedule
 
 logging.basicConfig(level=logging.WARNING)
-logger = logging.getLogger()
-
+logging.getLogger(sketch_gnn.__name__).setLevel(logging.INFO)
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 ######## STEP 1 : Init Datasets
 conf = parse_config('config/gat.yml')
@@ -66,8 +68,8 @@ if __name__=='__main__':
         max_epochs=d_train.get('max_epochs'), 
         # progress_bar_refresh_rate=20, 
         logger=logger_tensorboard,
-        # limit_train_batches=2000,
-        # limit_val_batches=1,
+        limit_train_batches=5,
+        limit_val_batches=5,
         callbacks=[checkpoint_callback],
         # profiler=profiler,
     )
@@ -80,6 +82,3 @@ if __name__=='__main__':
     # model_scripted = torch.jit.script(model) # Export to TorchScript
     # model_scripted.save(os.path.join(logger_conf.get('save_dir'),'model_scripted.pt')) # Save
     # torch.save(model.state_dict(), os.path.join(logger_conf.get('save_dir'),'model_scripted.pt'))
-
-    ######## STEP 3 : Compute validation
-    # trainer.test(test_dataloaders=test)

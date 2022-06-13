@@ -14,9 +14,11 @@ from sketch_gnn.utils.to_dict import parse_config
 from sketch_gnn.dataloader.generate_dataModule import SketchGraphDataModule
 from sketch_gnn.models.gat import GaT
 from sketch_gnn.models.predict import PredictSketch
-from sketch_gnn.utils.logger import logger
 from sketch_gnn.inference.metrics import sketch_wise_precision_recall
+
 if __name__=='__main__':
+    logging.basicConfig(level=logging.INFO)
+    logger = logging.getLogger(__name__)
     parser = ArgumentParser()
     parser.add_argument('--path', help= 'path to your model checkpoint')
     parser.add_argument('--thr', default=0.98, help='threshold used for evaluation', type=float)
@@ -50,7 +52,7 @@ if __name__=='__main__':
     logger.info('-- Logger and Trainer initialization:...')
     ######## STEP 3 : Init Trainer and launch evaluation on test
     trainer = pl.Trainer(
-        gpus=1,
+        # gpus=1,
         callbacks=[],
         logger=False,
         )

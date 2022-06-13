@@ -8,7 +8,7 @@ from sketch_gnn.dataloader.collate import collate
 
 
 
-from sketch_gnn.utils.logger import logger
+logger = logging.getLogger(__name__)
 
 class SketchGraphDataModule(pl.LightningDataModule):
     def __init__(self,conf: Dict = None, preprocessing_params:Dict = {}):

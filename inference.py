@@ -3,8 +3,7 @@ import pytorch_lightning as pl
 import torch
 import os 
 
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 import sys
 
