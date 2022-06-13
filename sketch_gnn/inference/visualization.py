@@ -80,7 +80,6 @@ def render_prim(prim: Primitive, ax: plt.Axes, color='black', linewidth=1) -> No
                 linestyle=prim._get_linestyle(),
                 linewidth=linewidth)
         elif prim.get_name == 'ARC':
-            prim.radian = True
             prim.plot(ax, color=color, linewidth=linewidth)
         elif prim.get_name == 'POINT':
             prim.plot(ax, color=color, s=10*(2*linewidth)**2)
