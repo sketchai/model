@@ -3,10 +3,10 @@ import pytorch_lightning as pl
 import torch
 import os 
 import pickle
-from src.utils.to_dict import parse_config
-from src.dataloader.generate_dataModule import SketchGraphDataModule
-from src.models.gat import GaT
-from src.models.predict import PredictSketch
+from sketch_gnn.utils.to_dict import parse_config
+from sketch_gnn.dataloader.generate_dataModule import SketchGraphDataModule
+from sketch_gnn.models.gat import GaT
+from sketch_gnn.models.predict import PredictSketch
 from pytorch_lightning.loggers import TensorBoardLogger
 from pytorch_lightning.profiler import PyTorchProfiler
 from pytorch_lightning.callbacks import ModelCheckpoint

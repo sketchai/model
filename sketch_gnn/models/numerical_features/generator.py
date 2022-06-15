@@ -1,8 +1,8 @@
 import torch
 from typing import Dict
 
-from src.models.numerical_features.embedding import NumericalFeaturesEmbedding
-from src.models.numerical_features.encoding import NumericalFeatureEncoding
+from sketch_gnn.models.numerical_features.embedding import NumericalFeaturesEmbedding
+from sketch_gnn.models.numerical_features.encoding import NumericalFeatureEncoding
 
 
 def generate_embedding(d_features_dims: Dict = {}, embedding_dim: int = None) -> Dict:

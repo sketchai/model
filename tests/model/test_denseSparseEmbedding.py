@@ -2,14 +2,14 @@ import os
 import unittest
 import logging
 import pickle
-from src.utils.to_dict import yaml_to_dict
+from sketch_gnn.utils.to_dict import parse_config
 
 
 
-from src.models.dense_emb import DenseSparsePreEmbedding
+from sketch_gnn.models.dense_emb import DenseSparsePreEmbedding
 
-from src.models.numerical_features.generator import generate_embedding
-from src.dataloader.generate_dataModule import SketchGraphDataModule
+from sketch_gnn.models.numerical_features.generator import generate_embedding
+from sketch_gnn.dataloader.generate_dataModule import SketchGraphDataModule
 
 
 
@@ -23,16 +23,8 @@ class TestDenseSparseEmbedding(unittest.TestCase):
 
     def test_forward(self):
         # Load an example
-        conf = yaml_to_dict('tests/asset/mock/gat_example.yml')
-        d_train = conf.get('train')
-
-        # update path
-        main_dir = conf.get('experiment').get('dir')
-        conf['train']['prep_parms_path'] = os.path.join(main_dir, conf['train']['file_prep_parms'])
-        for x in ['data', 'weights']:
-            conf['train_data'][f'path_{x}'] = os.path.join(main_dir, conf['train_data'][f'file_{x}'])    
-            
-        with open(d_train.get('file_prep_parms'), 'rb') as f:
+        conf = parse_config('tests/asset/mock/gat_example.yml')            
+        with open(conf.get('file_prep_parms'), 'rb') as f:
             d_prep = pickle.load(f)
 
         # logger.info(f'--- d_prep= {d_prep}')

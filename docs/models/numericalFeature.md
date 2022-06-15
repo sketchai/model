@@ -1,8 +1,8 @@
 # Numerical Features
 
-The [numerical_features](src/models/numerical_features) folder gathers a set of methods to convert constraint and type data of a CAD model into numerical vectors.
+The [numerical_features](sketch_gnn/models/numerical_features) folder gathers a set of methods to convert constraint and type data of a CAD model into numerical vectors.
 
-In particular, the classes [NumericalFeatureEncoding](src/models/numerical_features/encoding.py) and [NumericalFeaturesEmbedding](src/models/numerical_features/embedding.py) are directly extracted from the [numerical_features.py](https://gitlab.pam-retd.fr/cao_ml/sg/-/blob/master/sketchgraphs_models/graph/model/numerical_features.py) of SketchGraph model.
+In particular, the classes [NumericalFeatureEncoding](sketch_gnn/models/numerical_features/encoding.py) and [NumericalFeaturesEmbedding](sketch_gnn/models/numerical_features/embedding.py) are directly extracted from the [numerical_features.py](https://gitlab.pam-retd.fr/cao_ml/sg/-/blob/master/sketchgraphs_models/graph/model/numerical_features.py) of SketchGraph model.
 
 
 
@@ -12,12 +12,12 @@ About the test: tests class can be found [here](tests/model/test_numericalFeatur
 ## 1. Numerical features description
 
 ### 1.1 Numerical Feature encoding
-[Class NumericalFeatureEncoding](src/models/numerical_features/encoding.py) 
+[Class NumericalFeatureEncoding](sketch_gnn/models/numerical_features/encoding.py) 
 
 
 
 ### 1.2 Numerical Feature embedding
-[Class NumericalFeaturesEmbedding](src/models/numerical_features/embedding.py)  is a ```torch.nn.Module``` that transform a sequence of vectors into a single one. This reduction of information is done by an average operation on each vector of the sequence.
+[Class NumericalFeaturesEmbedding](sketch_gnn/models/numerical_features/embedding.py)  is a ```torch.nn.Module``` that transform a sequence of vectors into a single one. This reduction of information is done by an average operation on each vector of the sequence.
 
 About our case : 
 
@@ -37,7 +37,7 @@ Outputs:
 - d_embedding (Dict) : a dict {elt.name : torch.nn.Module} where the torch.nn.Module encodes the feature into a vector of size embedding_dim
 
 __How is it done?__  
-The encoding and embedding methods are combined into a single function: the [numerical feature generator](src/models/numerical_features/generator.py).
+The encoding and embedding methods are combined into a single function: the [numerical feature generator](sketch_gnn/models/numerical_features/generator.py).
 Specifically, function ```generate_embedding(d_features_dims: Dict = {}, embedding_dim: int = None) -> Dict``` generates a dict of embedding layers whose keys are element names. 
 
 __Examples?__  

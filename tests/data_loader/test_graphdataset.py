@@ -2,21 +2,9 @@ import unittest
 import logging
 import torch
 import numpy as np
+from sketch_gnn.utils.logger import logger
 
-
-
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger()
-
-import sys 
-sys.path.append('/home/i37181/Documents/Projets/CAO/SketchGraphs/sketchgraphs')
-
-from src.dataloader.graph_data import GraphDataset
-
-
-import sys 
-sys.path.append('/home/i37181/Documents/Projets/CAO/SketchGraphs/sketchgraphs')
-from sketchgraphs.data import flat_array
+from sketch_gnn.dataloader.graph_data import GraphDataset
 
 class TestGraphDataset(unittest.TestCase):
 

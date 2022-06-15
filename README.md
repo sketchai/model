@@ -1,5 +1,6 @@
 # deepmodel_attention
 
+## Installation
 
 1. Generate a conda env 
 First, create and activate a basic conda env from the [env_gat.yml](./env/env_gat.yml) file. 
@@ -14,8 +15,6 @@ then
 ```
     conda activate env_gat
 ```
-
-NB: it can be good to change the conda name env into [env_basic_conda.yml](./env/env_basic_conda.yml) file.
 
 
 2. Install poetry and package dependencies
@@ -33,29 +32,34 @@ To update package dependencies,
 
 ## Testing 
 
-For running all the tests:
+Run all the tests:
 
 ```
     poetry run pytest 
 ```
 
-For running a specific test: [TO COMPLETE]
+Run a specific test:
 
+```
+    poetry run pytest tests/model/test_messagepassing.py
+```
 
 See test coverage : [TO COMPLETE]
 
 ## Start a training and see results
 
-To start a training : 
+Configure the path to your data in the [configuration file](config/gat.yml).
+
+Start training: 
 
 ```
 python commander.py
 ```
 
-To see metrics :
+To see the metrics :
 
 ```
-tensorboard --logdir your_path_logs
+tensorboard --logdir data/gat_logs
 ```
 The following line will appear
 
@@ -71,18 +75,21 @@ TensorBoard 2.8.0 at http://localhost:6006/ (Press CTRL+C to quit)
 
 ```
 
-Open the path 'http://localhost:6006/' in Firefox.
+Open the path 'http://localhost:6006/' in your browser.
 
+## Reproduce results
 
-## Run on HPC
-
-Run on HPC (edit the .sh file to change dataset):
+Run the evaluation loop on the test dataset:
 
 ```
-sbatch scripts/commander.sh
+python testloop.py --path path/to/the/ckpt
 ```
 
-## Look at data
+## Notebooks
+
+Play with your trained model in the [inference](notebook/inference.ipynb) notebook.
+
+You will need to install [sam](https://github.com/sketchai/sam) and [ipywidgets](https://pypi.org/project/ipywidgets/) to visualize the results.
 
 Use the following notebook to inspect the input data :
 ```

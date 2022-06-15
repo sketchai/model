@@ -1,8 +1,8 @@
 from unicodedata import category
 import matplotlib.patches
 import matplotlib.pyplot as plt
-from src.inference.castor import PredictionToCastor
-from src.inference.eval import EvalPrediction
+from sketch_gnn.inference.sam import PredictionToSam
+from sketch_gnn.inference.eval import EvalPrediction
 from sam.sketch import Sketch
 from sam.primitive import Primitive
 from sam.constraint import Constraint
@@ -80,7 +80,6 @@ def render_prim(prim: Primitive, ax: plt.Axes, color='black', linewidth=1) -> No
                 linestyle=prim._get_linestyle(),
                 linewidth=linewidth)
         elif prim.get_name == 'ARC':
-            prim.radian = True
             prim.plot(ax, color=color, linewidth=linewidth)
         elif prim.get_name == 'POINT':
             prim.plot(ax, color=color, s=10*(2*linewidth)**2)
@@ -182,7 +181,7 @@ def display_inference(sketch: Sketch, pred: EvalPrediction, legend=True, categor
     ax.set_xlim([-0.5, 1.5])
     ax.set_ylim([-0.5, 1.5])
     d_categories = pred.d_categories
-    l_constraints = PredictionToCastor.get_constraints(sketch, pred)
+    l_constraints = PredictionToSam.get_constraints(sketch, pred)
 
     indexes_to_show = filter_edges_for_visu(pred, hide_tp=False, hide_given=False, categories=categories)
     
@@ -225,7 +224,7 @@ def display_specific_constraint(sketch: Sketch, pred: EvalPrediction, request=-1
     render_sketch(sketch, ax)
     ax.set_xlim([-0.5, 1.5])
     ax.set_ylim([-0.5, 1.5])
-    l_constraints = PredictionToCastor.get_constraints(sketch, pred)
+    l_constraints = PredictionToSam.get_constraints(sketch, pred)
 
     d_categories = pred.d_categories
     if legend:

@@ -3,9 +3,9 @@ from sam.catalog_constraint import Horizontal, Vertical, Parallel, Length, Coinc
 from sam.constraint import Constraint
 from sam.sketch import Sketch
 from sam.primitive import Primitive
-from src.utils.format_encoding import format_for_encoding
-from src.utils.logger import logger
-from src.inference.eval import EvalPrediction
+from sketch_gnn.utils.format_encoding import format_for_encoding
+from sketch_gnn.utils.logger import logger
+from sketch_gnn.inference.eval import EvalPrediction
 
 
 NAME_TO_CONSTRAINT_MAP = {
@@ -25,7 +25,7 @@ NAME_TO_CONSTRAINT_MAP = {
     'VERTICAL_LENGTH': VerticalLength,
 }
 
-class PredictionToCastor:
+class PredictionToSam:
 
     def get_constraints(sketch: Sketch, pred: EvalPrediction)->dict:
         """

@@ -2,32 +2,17 @@ import unittest
 import logging
 import os
 import pickle
-from src.utils.to_dict import yaml_to_dict
+from sketch_gnn.utils.to_dict import parse_config
+from sketch_gnn.utils.logger import logger
 
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger()
-
-import sys 
-sys.path.append('/home/i37181/Documents/Projets/CAO/SketchGraphs/sketchgraphs')
-
-from src.dataloader.generate_dataModule import SketchGraphDataModule
+from sketch_gnn.dataloader.generate_dataModule import SketchGraphDataModule
 
 class TestSketchGraphDataModule(unittest.TestCase):
 
     def test_creation(self):
 
-        conf = yaml_to_dict('tests/asset/mock/gat_example.yml')
-        # update main path
-        main_dir = conf.get('experiment').get('dir')
-        conf['logger']['save_dir'] = os.path.join(main_dir, conf['logger']['save_dir'])
-
-        conf['train']['prep_parms_path'] = os.path.join(main_dir, conf['train']['file_prep_parms'])
-        for x in ['data', 'weights']:
-            conf['train_data'][f'path_{x}'] = os.path.join(main_dir, conf['train_data'][f'file_{x}'])    
-            conf['val_data'][f'path_{x}'] = os.path.join(main_dir, conf['val_data'][f'file_{x}'])   
-
-        d_train = conf.get('train')
-        with open(d_train.get('prep_parms_path'), 'rb') as f:
+        conf = parse_config('tests/asset/mock/gat_example.yml')
+        with open(conf.get('prep_parms_path'), 'rb') as f:
             d_prep = pickle.load(f)
         graph_dataset = SketchGraphDataModule(conf, d_prep)
 

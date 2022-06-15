@@ -10,16 +10,25 @@ logger:
 train_data: # Train data related parameters
   num_workers: 48
   file_data: "sg_merged_final_train.npy" #folder or file name (should end with .npy)
-  file_weights: "sg_merged_weights_train.npy"  
+  file_weights: "sg_merged_weights_train.npy"
+  prop_max_edges_given: 0.9
+  variation: 0.25
 
 val_data: # val data related parameters
   num_workers: 48
   file_data: "sg_merged_final_val.npy"
+  prop_max_edges_given: 0.9
+  variation: 0
+
+test_data: # test data related parameters
+  num_workers: 12
+  file_data: "sg_merged_final_test.npy"
+  prop_max_edges_given: 0.75
+  variation: 0
 
 train:
   batch_size: 4096
-  prop_max_edges_given: 0.9
-  max_epochs: 200
+  max_epochs: 100
 
 optimizer:
   lr: !!float 5e-4

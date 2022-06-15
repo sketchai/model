@@ -3,10 +3,10 @@ import torch
 from typing import Dict
 import pytorch_lightning as pl
 
-from src.models.numerical_features.generator import generate_embedding
-from src.models.dense_emb import DenseSparsePreEmbedding, ConcatenateLinear
-from src.dataloader.batch_data import GraBatch
-from src.utils.example_generator import ex_generator
+from sketch_gnn.models.numerical_features.generator import generate_embedding
+from sketch_gnn.models.dense_emb import DenseSparsePreEmbedding, ConcatenateLinear
+from sketch_gnn.dataloader.batch_data import GraBatch
+from sketch_gnn.utils.example_generator import ex_generator
 
 import logging
 logging.basicConfig(level=logging.DEBUG)
@@ -86,6 +86,24 @@ class GaT(pl.LightningModule):
         """
         data = AttrDict(batch_data)
 
+        output_transformer = self.encode_nodes(batch_data)
+        edges_neg, edges_pos = data.edges_toInf_neg, data.edges_toInf_pos
+        representation_final_edges = GaT.representation_final_edges(output_transformer, edges_neg, edges_pos)
+
+        d = {"edges_pos": self.prediction_edge(representation_final_edges['edges_pos']),
+             "edges_neg": self.prediction_edge(representation_final_edges['edges_neg']),
+             "type": self.prediction_type(representation_final_edges['edges_pos']),
+             "type_neg": self.prediction_type(representation_final_edges['edges_neg'])}
+        
+
+        return d
+
+    def encode_nodes(self, batch_data):
+        """
+        Embedding + Message passing + Transformer
+        """
+        data = AttrDict(batch_data)
+
         # Compute node and edge embedding
         node_embedding = self.node_embedding(data.node_features, data.sparse_node_features)
         edge_embedding = self.edge_embedding(data.edge_features, data.sparse_edge_features)
@@ -100,18 +118,9 @@ class GaT(pl.LightningModule):
 
         input_embedding = input_embedding.view((data.l_batch, self.lMax, self.embedding_dim)) # reshape
         output_transformer = torch.transpose(self.transformer_encoder(torch.transpose(input_embedding, 0, 1),
-                                                                      src_key_padding_mask=data.src_key_padding_mask), 0, 1)  # Apply Transformer
-
-        edges_neg, edges_pos = data.edges_toInf_neg, data.edges_toInf_pos
-        representation_final_edges = GaT.representation_final_edges(output_transformer, edges_neg, edges_pos)
-
-        d = {"edges_pos": self.prediction_edge(representation_final_edges['edges_pos']),
-             "edges_neg": self.prediction_edge(representation_final_edges['edges_neg']),
-             "type": self.prediction_type(representation_final_edges['edges_pos']),
-             "type_neg": self.prediction_type(representation_final_edges['edges_neg'])}
-        
-
-        return d
+                                                                      src_key_padding_mask=data.src_key_padding_mask), 0, 1)
+                                                                      # Apply Transformer
+        return output_transformer
 
     def aggregate_by_incidence(self, node_embedding, incidence, edge_embedding):
 
@@ -132,6 +141,20 @@ class GaT(pl.LightningModule):
         return {
             'edges_neg': torch.index_select(output, 0, edges_neg[:, 0]) * torch.index_select(output, 0, edges_neg[:, 1]),
             'edges_pos': torch.index_select(output, 0, edges_pos[:, 0]) * torch.index_select(output, 0, edges_pos[:, 1])}
+
+    @torch.no_grad()
+    def infer(self,batch_data)->Dict:
+        data = AttrDict(batch_data)
+
+        output = self.encode_nodes(batch_data)
+        edges = data.edges
+        edges_embedding = torch.index_select(output, 0, edges[:, 0]) * torch.index_select(output, 0, edges[:, 1])
+        d = {
+            "binary": self.prediction_edge(edges_embedding),
+            "type": self.prediction_type(edges_embedding),
+        }
+        return d
+
 
     def loss(prediction, data, coef_neg=1., weight_types=None):
         # device = data.edges_toInf_pos_types.device

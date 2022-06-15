@@ -2,7 +2,7 @@ from typing import Dict
 from sam.catalog_primitive import Point, Line, Circle, Arc
 from sam.primitive import Primitive
 from sam.constraint import Constraint
-from src.utils.logger import logger
+from sketch_gnn.utils.logger import logger
 
 class SubnodeConstraint(Constraint):
     """Subnode Constraint, temporary class for encoding"""

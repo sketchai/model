@@ -1,7 +1,7 @@
 import numpy as np
 import torch
-from src.models.gat import AttrDict
-from src.utils.logger import logger
+from sketch_gnn.models.gat import AttrDict
+from sketch_gnn.utils.logger import logger
 
 class EvalPrediction:
 
@@ -29,11 +29,11 @@ class EvalPrediction:
         self.true_type = torch.cat([batch.edges_toInf_pos_types, padding, batch.edge_features[:n_edges_given]], axis=0).cpu().detach().numpy()
         self.true_type_name = [reverse_edge_idx_map.get(i,'None') for i in self.true_type]
 
-        
-        self.set_categories(threshold)
-        self.edges_category = np.empty_like(self.true_type, dtype=object)
-        for key, l_idxes in self.d_categories.items():
-            self.edges_category[l_idxes] = key
+        if threshold is not None:
+            self.set_categories(threshold)
+            self.edges_category = np.empty_like(self.true_type, dtype=object)
+            for key, l_idxes in self.d_categories.items():
+                self.edges_category[l_idxes] = key
 
     def set_categories(self, threshold)->None:
         """

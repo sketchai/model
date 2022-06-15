@@ -7,7 +7,7 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger()
 
 
-from src.utils.flat_array import load_flat_array
+from sketch_gnn.utils.flat_array import load_flat_array
 
 RNG = np.random.default_rng()
 

@@ -20,6 +20,7 @@ def parse_config(file_path: str) -> Dict:
     conf['train_data']['path_data'] = os.path.join(main_dir, conf['train_data']['file_data'])    
     conf['train_data']['path_weights'] = os.path.join(main_dir, conf['train_data']['file_weights'])   
     conf['val_data']['path_data'] = os.path.join(main_dir, conf['val_data']['file_data'])
+    conf['test_data']['path_data'] = os.path.join(main_dir, conf['test_data']['file_data'])
     return conf
 
 def stack_hparams(conf):
