@@ -26,6 +26,7 @@ class SketchGraphDataModule(pl.LightningDataModule):
                                         lMax=preprocessing_params.get('lMax'))
 
 
+
     def train_dataloader(self):
         logger.info('-- Load Train Set')
         collate_fn = functools.partial(
