@@ -25,6 +25,7 @@ class SketchGraphDataModule(pl.LightningDataModule):
                                         lMax=preprocessing_params.get('lMax'),
                                         prop_max_edges_given=conf.get('train').get('prop_max_edges_given'))
 
+
     def train_dataloader(self):
         logger.info('-- Load Train Set')
         return generate_dataset(conf=self.d_train, batch_size=self.batch_size, collate_fn=self.collate_fn)
