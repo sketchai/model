@@ -5,7 +5,7 @@ description = ""
 authors = ["EDF - F.Robin"]
 
 [tool.poetry.dependencies]
-python = "3.9.9"
+python = "^3.9.9"
 pytorch-lightning = "^1.5.10"
 matplotlib = "^3.5.1"
 pygraphviz = "^1.9"

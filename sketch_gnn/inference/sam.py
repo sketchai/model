@@ -1,5 +1,5 @@
 from unicodedata import category
-from sam.catalog_constraint import Horizontal, Vertical, Parallel, Length, Coincident, Perpendicular, Distance, Radius, Tangent, Midpoint, Equal, Angle, HorizontalLength, VerticalLength
+from sam.catalog_constraint import Horizontal, Vertical, Parallel, Length, Coincident, Perpendicular, Distance, Radius, Tangent, Midpoint, Equal, Angle, HorizontalDistance, VerticalDistance
 from sam.constraint import Constraint
 from sam.sketch import Sketch
 from sam.primitive import Primitive
@@ -21,8 +21,8 @@ NAME_TO_CONSTRAINT_MAP = {
     'MIDPOINT': Midpoint,
     'EQUAL': Equal,
     'ANGLE': Angle,
-    'HORIZONTAL_LENGTH': HorizontalLength,
-    'VERTICAL_LENGTH': VerticalLength,
+    'HORIZONTAL_DISTANCE': HorizontalDistance,
+    'VERTICAL_DISTANCE': VerticalDistance,
 }
 
 class PredictionToSam:

@@ -12,7 +12,7 @@ PARENT_COLOR = {
     'green': 'lightgreen',
     'red': 'pink',
     'blue': 'lightblue',
-    'orange': 'yellow',
+    'darkorange': 'yellow',
     'purple': 'violet',
     'grey': 'lightgrey',
 }
@@ -30,8 +30,8 @@ NAME_TO_SYMBOL_MAP = {
     'MIDPOINT':     '\n\n   M  ',
     'EQUAL':        '\n\n    = ',
     'ANGLE':        '\n\n     ∡',
-    'HORIZONTAL_LENGTH':'hL',
-    'VERTICAL_LENGTH':  'vL',
+    'HORIZONTAL_DISTANCE':'hL',
+    'VERTICAL_DISTANCE':  'vL',
 }
 
 COLOR_MAP = {
