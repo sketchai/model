@@ -68,8 +68,8 @@ if __name__=='__main__':
         max_epochs=d_train.get('max_epochs'), 
         # progress_bar_refresh_rate=20, 
         logger=logger_tensorboard,
-        limit_train_batches=5,
-        limit_val_batches=5,
+        # limit_train_batches=5,
+        # limit_val_batches=5,
         callbacks=[checkpoint_callback],
         # profiler=profiler,
     )
