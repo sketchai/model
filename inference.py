@@ -63,7 +63,7 @@ with open(d_train.get('prep_parms_path'), 'rb') as f:
 # Add node_idx_map and edge_idx_map (must be placed directly into the preprocessing files)
 from sketch_gnn.dataloader.generate_dataModule import SketchGraphDataModule
 
-graph_dataset = SketchGraphDataModule(conf, d_prep)
+graph_dataset = SketchGraphDataModule(conf)
 dataset = graph_dataset.val_dataloader()
 logger.debug(f'dataset size={len(dataset)}')
 logger.debug(f'dataset.dataset: nb size={len(dataset.dataset)}')

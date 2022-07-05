@@ -27,7 +27,7 @@ class TestMessagePassing(unittest.TestCase):
             d_prep = pickle.load(f)
 
         # logger.info(f'--- d_prep= {d_prep}')
-        graph_dataset = SketchGraphDataModule(conf, d_prep)
+        graph_dataset = SketchGraphDataModule(conf)
         self.dataset = graph_dataset.train_dataloader()
         logger.debug(f'dataset size={len(self.dataset)}')
 

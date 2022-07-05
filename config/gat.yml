@@ -15,7 +15,7 @@ train_data: # Train data related parameters
   variation: 0.25
 
 val_data: # val data related parameters
-  num_workers: 48
+  num_workers: 12
   file_data: "sg_merged_final_val.npy"
   prop_max_edges_given: 0.9
   variation: 0

@@ -55,7 +55,7 @@ if __name__=='__main__':
         logger=False,
         )
     prop = args.prop or conf['test_data']['prop_max_edges_given']
-    data = SketchGraphDataModule(conf,preprocessing_params)
+    data = SketchGraphDataModule(conf)
     _ = trainer.test(sketchPredictionmodel, dataloaders=data.test_dataloader())
     
     results = sketchPredictionmodel.test_results

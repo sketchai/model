@@ -58,7 +58,7 @@ if __name__=='__main__':
         conf['val_data']['prop_max_edges_given'] = prop
         print('-'*10 + f'Given edges: {int(100*prop)}%')
         # Create DataLoader
-        data = SketchGraphDataModule(conf,preprocessing_params)
+        data = SketchGraphDataModule(conf)
         _ = trainer.test(sketchPredictionmodel, dataloaders=data.val_dataloader())
         results = sketchPredictionmodel.test_results
 
@@ -79,7 +79,7 @@ if __name__=='__main__':
     if args.test:
         for prop, thr in zip(props, thresholds):
             conf['test_data']['prop_max_edges_given'] = prop
-            data = SketchGraphDataModule(conf,preprocessing_params)
+            data = SketchGraphDataModule(conf)
             _ = trainer.test(sketchPredictionmodel, dataloaders=data.test_dataloader())
             results = sketchPredictionmodel.test_results
             avg_precision, avg_recall = sketch_wise_precision_recall(results, thr=thr)

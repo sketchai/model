@@ -19,7 +19,7 @@ class TestEvalPrediction(unittest.TestCase):
         self.edge_idx_map = d_prep.get('edge_idx_map')
 
         # Load dataset
-        graph_dataset = SketchGraphDataModule(conf, d_prep)
+        graph_dataset = SketchGraphDataModule(conf)
         train_dataset = graph_dataset.train_dataloader()
         data_gen = iter(train_dataset)
 
