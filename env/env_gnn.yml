@@ -1,4 +1,4 @@
-name: env_gat
+name: env_gnn
 
 channels:
   - default
@@ -6,8 +6,9 @@ channels:
 
 dependencies:
   - python=3.9
-  - pip=22.3.3
+  - pip=22.0
   - poetry=1.1.12
   - pytorch=1.8.1
   - pip:
     - requests==2.25.0
+    

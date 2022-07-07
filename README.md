@@ -3,17 +3,17 @@
 ## Installation
 
 1. Generate a conda env 
-First, create and activate a basic conda env from the [env_gat.yml](./env/env_gat.yml) file. 
+First, create and activate a basic conda env from the [env_gnn.yml](./env/env_gnn.yml) file. 
 
 Run 
 ```
-    conda env create -f ./env/env_gat.yml
+    conda env create -f ./env/env_gnn.yml
 ```
 
 then 
 
 ```
-    conda activate env_gat
+    conda activate env_gnn
 ```
 
 

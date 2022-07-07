@@ -59,9 +59,9 @@ class TestEvalPrediction(unittest.TestCase):
                 self.assertTrue(key in expected_keys)
 
     def test_init(self):
-        n_edges_toInf_pos = self.batch['edges_toInf_pos'].shape[0]
-        n_edges_toInf_neg = self.batch['edges_toInf_neg'].shape[0]
-        n_edges_given = self.batch['incidences'].shape[1]//2
+        n_edges_toInf_pos = self.batch.constr_toInf_pos.shape[0]
+        n_edges_toInf_neg = self.batch.constr_toInf_neg.shape[0]
+        n_edges_given = self.batch.incidences.shape[0]
         n_edges_toInf = n_edges_toInf_neg + n_edges_toInf_pos
         n_edges_total = n_edges_toInf + n_edges_given
 
@@ -73,8 +73,8 @@ class TestEvalPrediction(unittest.TestCase):
 
         array_dtype = {
             'predicted_sigmoid': np.float32,
-            'true_label': np.float,
-            'references': np.int,
+            'true_label': float,
+            'references': int,
         }
 
         for name, shape in array_shape.items():

@@ -15,7 +15,13 @@ class TestBipartiteData(unittest.TestCase):
     #     self.concatenate = ConcatenateLinear(left_size=10, right_size=1, output_size=5)
 
     def test_creation(self):
-        graph_dataset = GraphDataset(path_seq='tests/asset/dataset/mini_example/encoding_results.npy', path_weights='tests/asset/dataset/mini_example/mini_weights.npy')
+        graph_dataset = GraphDataset(
+            path_seq='tests/asset/dataset/mini_example/encoding_results.npy',
+            path_weights='tests/asset/dataset/mini_example/mini_weights.npy',
+            prop_max_edges_given=0.5,
+            variation=0.,
+            inference=True,
+            )
 
         logger.debug(f'graph dataset: {graph_dataset.dataset}')
         logger.debug(f'graph dataset: {graph_dataset.weights}')
@@ -26,6 +32,7 @@ class TestBipartiteData(unittest.TestCase):
         logger.debug('incidences')
         logger.debug(g.incidences)
         logger.debug('edge_index.T')
+        logger.debug(g.edge_index.T)
         copied_g_index = copy(g.edge_index)
         selfloops = []
 
@@ -50,13 +57,18 @@ class TestBipartiteData(unittest.TestCase):
         logger.debug('x_c')
         logger.debug(g.x_c)
 
-        g.hide_constraints(prop_max_edges_given=0.3,variation=0.)
+        g.hide_constraints(prop_max_edges_given=0.5,variation=0.)
 
-
+        logger.debug('Hiding constraints')
+        logger.debug('g.edge_index')
         logger.debug(g.edge_index)
-        logger.debug(copied_g_index)
+        logger.debug('g.x_c')
+        logger.debug(g.x_c)
 
-        # Problème: les indices des noeuds ont changé après hide
+        logger.debug(g.constr_toInf_neg.max())
+        logger.debug(g.constr_toInf_pos.max())
+        logger.debug(g.x_p.shape)
+
 
         
 

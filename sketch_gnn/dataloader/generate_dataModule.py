@@ -5,9 +5,6 @@ import functools
 from typing import Dict
 
 from sketch_gnn.dataloader.load import generate_dataset
-from sketch_gnn.dataloader.collate import collate 
-
-
 
 from sketch_gnn.utils.logger import logger
 

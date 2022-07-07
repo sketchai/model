@@ -59,7 +59,7 @@ checkpoint_callback = ModelCheckpoint(monitor='val/loss',
                                         save_weights_only=True)
 if __name__=='__main__':
     trainer = pl.Trainer(
-            # accelerator='gpu',
+        accelerator='cpu',
         # devices=4,
         # strategy='ddp',
         gpus=1,

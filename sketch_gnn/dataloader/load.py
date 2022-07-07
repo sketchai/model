@@ -2,7 +2,7 @@ import torch
 from typing import Dict 
 
 from sketch_gnn.dataloader.graph_data import GraphDataset
-from torch_geometric.data import DataLoader
+from torch_geometric.loader import DataLoader
 
 import logging
 logging.basicConfig(level=logging.DEBUG)
@@ -26,6 +26,7 @@ def generate_dataset(conf: Dict, batch_size:int, sample=True):
     # Generate a DataLoader
     return DataLoader(
                 ds,
+                follow_batch=['x_p', 'x_c','constr_toInf_pos', 'constr_toInf_neg'],
                 # collate_fn=collate_fn,
                 batch_size=batch_size,
                 sampler=sampler,

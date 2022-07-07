@@ -33,4 +33,6 @@ class TestSketchGraphDataModule(unittest.TestCase):
             if i > 2 :
                 break
             logger.debug(f'batch = {batch} {i} /{len(val_dataset)}')
+            logger.debug(f'batch.batch = {batch.batch}')
+            logger.debug(f'batch.edge = {batch.edge_index}')
             # logger.debug(f'{i} batch:{batch}')

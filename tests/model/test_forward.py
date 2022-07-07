@@ -15,7 +15,7 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger()
 
 
-class TestMessagePassing(unittest.TestCase):
+class TestForward(unittest.TestCase):
 
     def setUp(self):
         # Load an example
@@ -26,7 +26,6 @@ class TestMessagePassing(unittest.TestCase):
         # logger.info(f'--- d_prep= {d_prep}')
         graph_dataset = SketchGraphDataModule(conf)
         self.dataset = graph_dataset.train_dataloader()
-        logger.debug(f'dataset size={len(self.dataset)}')
 
         # Model initialization
         d_model = conf.get('model')
@@ -37,27 +36,13 @@ class TestMessagePassing(unittest.TestCase):
         self.gat = GaT(d_model, d_prep)
         self.gat.to(self.device)
 
-    def test_message(self):
-
+    def test_forward(self):
 
         for i, data in enumerate(self.dataset):
             # Compute node and edge embedding
-            logger.info(f'data.node_features: {data.x_p.shape}')
-            logger.info(f'data.edge_features: {data.x_c.shape}')
-
-            x_p = self.gat.node_embedding_layer(data.x_p)
-            x_c = self.gat.edge_embedding_layer(data.x_c)
-
-            # Agregate node and edge information (message passing)
-            logger.info(f'x_p: {x_p.shape}')
-            logger.info(f'x_c: {x_c.shape}')
-
-            x_p, x_c = self.gat.gin_blocks[0](x_p,x_c,data.edge_index)
-
-            logger.info(f'x_p: {x_p.shape}')
-            logger.info(f'x_c: {x_c.shape}')
-
-            # input_embedding = node_embedding + agreg
+            logger.debug(data)
+            output = self.gat(data)
+            logger.debug(output)
             break
 
 

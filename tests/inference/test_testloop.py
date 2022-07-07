@@ -38,8 +38,9 @@ class TestTestLoop(unittest.TestCase):
         logger.info('-- Logger and Trainer initialization:...')
         ######## STEP 3 : Init Trainer and launch evaluation on test
         trainer = pl.Trainer(
-            gpus=1,
+            accelerator='cpu',
             callbacks=[],
+            max_epochs=-1,
             logger=False,
             )
         results = trainer.test(sketchPredictionmodel, dataloaders=data.test_dataloader())
