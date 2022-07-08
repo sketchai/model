@@ -23,18 +23,33 @@ class BipartiteData(Data):
     # The following attributes are incremented using __inc__
     prim_index = [
         'constr_toInf_pos',
-        'constr_toInf_pos_types',
         'constr_toInf_neg',
         'incidences',
     ]
 
-    def __init__(self, edge_index=None, x_p=None, x_c=None,*args,**kwargs):
-        super().__init__(*args,**kwargs)
-        self.edge_index = edge_index
+    def __init__(self,
+            x_p:torch.tensor,
+            x_c:torch.tensor,
+            incidences:torch.tensor,
+            edge_index:torch.tensor,
+            i_edges_given:torch.tensor,
+            i_edges_possible:torch.tensor,
+            positions:torch.tensor,
+            sequence_idx:torch.tensor,
+        ):
+        super().__init__()
         self.x_p = x_p
         self.x_c = x_c
-        for k, array in kwargs.items():
-            self.__setattr__(key=k, value=array)
+        self.incidences = incidences
+        self.edge_index = edge_index
+        self.i_edges_given = i_edges_given
+        self.i_edges_possible = i_edges_possible
+        self.positions = positions
+        self.sequence_idx = sequence_idx
+        if x_p is not None:
+            self.num_nodes = x_p.shape[0]
+        else:
+            self.num_nodes = 0
 
     def __inc__(self, key, value, *args, **kwargs):
         if key == 'edge_index': # shape (2,n_edges)

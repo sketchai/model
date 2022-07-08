@@ -120,7 +120,7 @@ class GaT(pl.LightningModule):
         loss_edge_pos = torch.mean(torch.nn.functional.softplus(-prediction['edges_pos']))
         loss_edge_neg = torch.mean(torch.nn.functional.softplus(prediction['edges_neg']))
 
-        loss_type = torch.nn.functional.cross_entropy(prediction['type'], data.edges_toInf_pos_types, weight=weight_types)
+        loss_type = torch.nn.functional.cross_entropy(prediction['type'], data.constr_toInf_pos_types, weight=weight_types)
 
         return loss_edge_pos + coef_neg * loss_edge_neg + loss_type
 

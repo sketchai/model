@@ -39,7 +39,7 @@ class PredictSketch(pl.LightningModule):
 
 
     def on_train_start(self):
-        self.logger.log_hyperparams(self.hparams, {"hp/val_loss": 0})
+        self.logger.log_hyperparams(self.hparams, {"hp/val_loss": 1.})
 
 
     def training_step(self, batch, batch_idx):
@@ -51,7 +51,7 @@ class PredictSketch(pl.LightningModule):
         if batch_idx%100 == 0:
             edges_pos = prediction['edges_pos'].cpu().detach().numpy()
             edges_neg = prediction['edges_neg'].cpu().detach().numpy()
-            self.log_binary_classification(edges_pos, edges_neg, tag='train')
+            self.log_binary_classification(edges_pos, edges_neg, tag='train', batch_size=batch.num_graphs)
             #TODO add aggregation (for now only one batch is used to compute the curve)
             frequency = self.max_epochs//10
             if batch_idx==0 and self.current_epoch%frequency==0:
@@ -71,11 +71,11 @@ class PredictSketch(pl.LightningModule):
             predicted_type_neg = torch.argmax(output['type_neg'], dim=-1).cpu().detach().numpy()
             true_type = batch.constr_toInf_pos_types.cpu().detach().numpy()
 
-        self.log('val/loss', loss)
-        self.log('hp/val_loss', loss)
+        self.log('val/loss', loss, batch_size=batch.num_graphs)
+        self.log('hp/val_loss', loss, batch_size=batch.num_graphs)
 
-        self.log_binary_classification(edges_pos, edges_neg, tag='val')
-        self.log_multiclass(true_type, predicted_type_pos, tag='val')
+        self.log_binary_classification(edges_pos, edges_neg, tag='val', batch_size=batch.num_graphs)
+        self.log_multiclass(true_type, predicted_type_pos, tag='val', batch_size=batch.num_graphs)
 
         # if (self.current_epoch in [5,15,49]) and batch_idx==0:
         #     self.log_embeddings(batch, tag='val')
@@ -105,7 +105,7 @@ class PredictSketch(pl.LightningModule):
         self.test_results = cat_outputs
 
 
-    def log_binary_classification(self, edges_pos, edges_neg, tag, on_step=False, on_epoch=True):
+    def log_binary_classification(self, edges_pos, edges_neg, tag, batch_size, on_step=False, on_epoch=True):
         tp = np.sum(edges_pos > 0)
         fn = np.sum(edges_pos < 0)
         tn = np.sum(edges_neg < 0)
@@ -115,9 +115,9 @@ class PredictSketch(pl.LightningModule):
             precision = tp / (tp + fp)
             recall = tp / (tp + fn)
             accuracy = (tp + tn) / (tp + fn + tn + fp)
-            self.log(f'{tag}/bin_accuracy', accuracy, on_step=on_step, on_epoch=on_epoch)
-            self.log(f'{tag}/bin_precision', precision, on_step=on_step, on_epoch=on_epoch)
-            self.log(f'{tag}/bin_recall',recall, on_step=on_step, on_epoch=on_epoch)
+            self.log(f'{tag}/bin_accuracy', accuracy, on_step=on_step, on_epoch=on_epoch, batch_size=batch_size)
+            self.log(f'{tag}/bin_precision', precision, on_step=on_step, on_epoch=on_epoch, batch_size=batch_size)
+            self.log(f'{tag}/bin_recall',recall, on_step=on_step, on_epoch=on_epoch, batch_size=batch_size)
 
     def log_pr_curve(self, edges_pos, edges_neg, tag):
         tb_logger = self.logger.experiment
@@ -126,9 +126,9 @@ class PredictSketch(pl.LightningModule):
         predictions = 1 / (1 + np.exp(-scalar_pred))
         tb_logger.add_pr_curve(f'{tag}/pr_curve', label, predictions,global_step=self.global_step)
 
-    def log_multiclass(self,true_type, predicted_type, tag):
+    def log_multiclass(self,true_type, predicted_type, tag, batch_size):
         accuracy = np.mean(predicted_type==true_type)
-        self.log(f'{tag}/class_accuracy', accuracy)
+        self.log(f'{tag}/class_accuracy', accuracy, batch_size=batch_size)
 
     def log_confusion_matrix(self,true_type, predicted_type, tag):
         tb_logger = self.logger.experiment
