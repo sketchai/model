@@ -5,10 +5,13 @@ channels:
   - conda-forge
 
 dependencies:
-  - python=3.9
+  - python=3.9.12
   - pip=22.0
   - poetry=1.1.12
-  - pytorch=1.8.1
   - pip:
     - requests==2.25.0
-    
+    - torch==1.11.0
+    - pytorch-lightning=1.6.4
+    - torch-scatter==2.0.9
+    - torch-sparse==0.6.14
+    - torch-geometric==2.0.4
