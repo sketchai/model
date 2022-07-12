@@ -180,7 +180,6 @@ def display_inference(sketch: Sketch, pred: EvalPrediction, legend=True, categor
     render_sketch(sketch, ax=ax)
     ax.set_xlim([-0.5, 1.5])
     ax.set_ylim([-0.5, 1.5])
-    d_categories = pred.d_categories
     l_constraints = PredictionToSam.get_constraints(sketch, pred)
 
     indexes_to_show = filter_edges_for_visu(pred, hide_tp=False, hide_given=False, categories=categories)
@@ -191,13 +190,14 @@ def display_inference(sketch: Sketch, pred: EvalPrediction, legend=True, categor
         highlight_constraint_with_info(constraint, info, color_prim=False)
 
     if legend:
-        add_legend(d_categories, ax)
+        add_legend(pred, ax)
 
     return fig, ax
         
 
-def add_legend(d_categories, ax):
+def add_legend(pred, ax):
     handles = []
+    d_categories = pred.d_categories
     legend_labels = {
             'true_positives': 'True Positives {} /{}',
             'false_positives': 'False Positives {} /{}',
@@ -206,9 +206,13 @@ def add_legend(d_categories, ax):
             'false_negatives_wrong_type': 'False Negatives wrong type {} /{}',
     }
     n_total_edges = sum((len(d_categories[category]) for category in legend_labels))
-    legend_labels['given'] = 'Given {}'
-    for i, (category, color) in enumerate(COLOR_MAP.items()):
-        legend_label = legend_labels[category].format(len(d_categories[category]),n_total_edges)
+    for category, label in legend_labels.items():
+        legend_labels[category] = label.format(len(d_categories[category]),n_total_edges)
+    # exclude subnodes
+    n_constr_given = len([idx for idx in d_categories['given'] if pred[idx]['true_type_name'] != 'Subnode'])
+    legend_labels['given'] = f'Given {n_constr_given}'
+    for category, color in COLOR_MAP.items():
+        legend_label = legend_labels[category]
         h = matplotlib.patches.Patch(color=color, label=legend_label)
         handles.append(h)
     legend = ax.legend(handles=handles, loc='upper left',fontsize="x-large")
@@ -226,9 +230,8 @@ def display_specific_constraint(sketch: Sketch, pred: EvalPrediction, request=-1
     ax.set_ylim([-0.5, 1.5])
     l_constraints = PredictionToSam.get_constraints(sketch, pred)
 
-    d_categories = pred.d_categories
     if legend:
-        add_legend(d_categories,ax)
+        add_legend(pred,ax)
 
     indexes_to_show = filter_edges_for_visu(pred, hide_tp=hide_tp, hide_given=hide_given, categories=categories)
     
