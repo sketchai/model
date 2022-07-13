@@ -4,21 +4,9 @@ import pytorch_lightning as pl
 import torch_geometric
 from torch_geometric.nn import MessagePassing, GINConv
 import torch_geometric.nn as pyg_nn
-from .concatenatelinear import ConcatenateLinear
 
 import logging
 logger = logging.getLogger(__name__)
-
-
-class BipartiteMessagePassing(MessagePassing):
-    """
-        Implementation of the msg passing operation
-    """
-
-    def __init__(self, embedding_dim):
-        super().__init__(aggr="add")
-
-        self.dense_merge = ConcatenateLinear(left_size=embedding_dim,right_size=embedding_dim,output_size=embedding_dim)
 
 
 class GINBlock(pl.LightningModule):

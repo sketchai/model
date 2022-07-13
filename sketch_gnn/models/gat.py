@@ -15,10 +15,6 @@ import logging
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger()
 
-class AttrDict(dict):
-    def __init__(self, base_dict:dict):
-        self.__dict__ = base_dict
-
 class GaT(pl.LightningModule):
     """
     The neural network. Some utilitaries are included.
@@ -71,6 +67,7 @@ class GaT(pl.LightningModule):
             gin_blocks.append(GINBlock(emb_dim=emb_dim))
         self.gin_blocks = torch.nn.ModuleList(gin_blocks)
 
+        self.skip_connections = d_model.get('skip_connections')
         self.prediction_edge = torch.nn.Linear(emb_dim, 1)
         self.prediction_type = torch.nn.Linear(emb_dim, len(d_prep.get('edge_idx_map')) - 1)
 
@@ -90,9 +87,12 @@ class GaT(pl.LightningModule):
         # Update input with positional encoding
         if self.positional_encoding is not None:
             x_p += self.positional_encoding(data.positions)
+        
 
-        for gin_step in self.gin_blocks:
+        for step, gin_step in enumerate(self.gin_blocks):
             x_p, x_c = gin_step(x_p, x_c, data.edge_index)
+            # if step in self.skip_connections:                
+            #     pass
 
         # Message Passing
         edges_neg, edges_pos = data.constr_toInf_neg, data.constr_toInf_pos

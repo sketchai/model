@@ -10,10 +10,6 @@ from sketch_gnn.dataloader.graph_data import BipartiteData, GraphDataset
 
 class TestBipartiteData(unittest.TestCase):
 
-    # @classmethod
-    # def setUp(self):
-    #     self.concatenate = ConcatenateLinear(left_size=10, right_size=1, output_size=5)
-
     def test_creation(self):
         graph_dataset = GraphDataset(
             path_seq='tests/asset/dataset/mini_example/encoding_results.npy',

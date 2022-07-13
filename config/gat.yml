@@ -10,7 +10,7 @@ logger:
 train_data: # Train data related parameters
   num_workers: 48
   file_data: "pyg_merged_final_train.npy" #folder or file name (should end with .npy)
-  file_weights: "pyg_merged_weights_train.npy"
+  file_weights: "sg_merged_weights_train.npy"
   prop_max_edges_given: 0.9
   variation: 0.25
 
@@ -28,7 +28,7 @@ test_data: # test data related parameters
 
 train:
   batch_size: 4096
-  max_epochs: 100
+  max_epochs: 10
 
 optimizer:
   lr: !!float 5e-4
@@ -36,7 +36,7 @@ optimizer:
   coef_neg: 1.
 
 model: # Architecture and model
-  n_layers: 20 # number of msg passing layers
+  n_layers: 5 # number of msg passing layers
   embedding_dim : 240
   positional_encoding: False
-
+  skip_connections: [1, 5]

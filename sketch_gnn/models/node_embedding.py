@@ -32,7 +32,7 @@ class NodeEmbeddingLayer(pl.LightningModule):
         self.sparse_embedding_layers = torch.nn.ModuleDict(sparse_embedding_layers)
         embedding_cardinality = len(self.node_idx_map)
         self.fixed_embedding_layer = torch.nn.Embedding(embedding_cardinality, embedding_dim)
-        self.dense_merge = ConcatenateLinear(left_size=embedding_dim,right_size=embedding_dim,output_size=embedding_dim)
+        self.dense_merge = ConcatenateLinear(sizes=[embedding_dim, embedding_dim],output_size=embedding_dim)
 
     def forward(self, node_features) -> torch.tensor:
         """
