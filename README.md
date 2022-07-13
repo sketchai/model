@@ -16,18 +16,13 @@ then
     conda activate env_gnn
 ```
 
+2. Follow the recommended installation for [pytorch](https://pytorch.org/) then [torch-geometric](https://pytorch-geometric.readthedocs.io/en/latest/notes/installation.html) and [pytorch-lightning](https://www.pytorchlightning.ai/)
 
-2. Install poetry and package dependencies
 
-To install package dependencies with poetry, 
+3. Install additional package dependencies via poetry
 
 ```
     poetry install
-```
-
-To update package dependencies, 
-```
-    poetry update
 ```
 
 ## Testing 
@@ -35,13 +30,13 @@ To update package dependencies,
 Run all the tests:
 
 ```
-    poetry run pytest 
+    pytest 
 ```
 
 Run a specific test:
 
 ```
-    poetry run pytest tests/model/test_messagepassing.py
+    pytest tests/model/test_messagepassing.py
 ```
 
 See test coverage : [TO COMPLETE]

@@ -66,7 +66,6 @@ class GaT(pl.LightningModule):
             self.positional_encoding = None
 
         # Msg Passing
-        logger.debug(d_model)
         gin_blocks = []
         for _ in range(d_model.get('n_layers')):
             gin_blocks.append(GINBlock(emb_dim=emb_dim))
