@@ -1,6 +1,5 @@
 import numpy as np
 import torch
-from sketch_gnn.models.gat import AttrDict
 import logging
 logger = logging.getLogger(__name__)
 

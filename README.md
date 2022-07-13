@@ -77,7 +77,7 @@ Open the path 'http://localhost:6006/' in your browser.
 Run the evaluation loop on the test dataset:
 
 ```
-python testloop.py --path path/to/the/ckpt
+python evaluationloop.py --path path/to/the/ckpt
 ```
 
 ## Notebooks
@@ -86,10 +86,6 @@ Play with your trained model in the [inference](notebook/inference.ipynb) notebo
 
 You will need to install [sam](https://github.com/sketchai/sam) and [ipywidgets](https://pypi.org/project/ipywidgets/) to visualize the results.
 
-Use the following notebook to inspect the input data :
-```
-jupyter-notebook ./notebook/data_input.ipynb
-```
 
 ## Docs
 

@@ -11,8 +11,8 @@ from sketch_gnn.dataloader.generate_dataModule import SketchGraphDataModule
 from sketch_gnn.models.gat import GaT
 logger = logging.getLogger(__name__)
 
-class TestTestLoop(unittest.TestCase):
-    def test_testloop(self):
+class TestEvaluationLoop(unittest.TestCase):
+    def test_EvaluationLoop(self):
         conf = parse_config('tests/asset/mock/gat_example.yml')
         # Initialize parameters
         d_train = conf.get('train')
