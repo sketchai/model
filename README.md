@@ -48,6 +48,8 @@ See test coverage : [TO COMPLETE]
 
 ## Start a training and see results
 
+Download the input data [here](https://huggingface.co/datasets/sketchai/sam-dataset)
+
 Configure the path to your data in the [configuration file](config/gat.yml).
 
 Start training: 
@@ -78,6 +80,8 @@ TensorBoard 2.8.0 at http://localhost:6006/ (Press CTRL+C to quit)
 Open the path 'http://localhost:6006/' in your browser.
 
 ## Reproduce results
+
+Download pretrained models [here](https://huggingface.co/sketchai/sketch-gnn)
 
 Run the evaluation loop on the test dataset:
 
