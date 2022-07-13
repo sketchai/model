@@ -95,10 +95,6 @@ Play with your trained model in the [inference](notebook/inference.ipynb) notebo
 
 You will need to install [sam](https://github.com/sketchai/sam) and [ipywidgets](https://pypi.org/project/ipywidgets/) to visualize the results.
 
-Use the following notebook to inspect the input data :
-```
-jupyter-notebook ./notebook/data_input.ipynb
-```
 
 ## Docs
 
