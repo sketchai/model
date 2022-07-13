@@ -7,7 +7,6 @@ logger = logging.getLogger(__name__)
 class EvalPrediction:
 
     def __init__(self, batch, output, edge_idx_map, threshold=0.95):
-        batch = AttrDict(batch)
 
         self.edge_idx_map = edge_idx_map
         reverse_edge_idx_map = {i:k for k,i in edge_idx_map.items()}
@@ -22,12 +21,11 @@ class EvalPrediction:
         self.predicted_type = np.concatenate([predicted_type_pos, predicted_type_neg], axis=0)
         self.predicted_type_name = [reverse_edge_idx_map[i] for i in self.predicted_type]
 
-        n_edges_given = batch.incidences.shape[1]//2
-        edges_given = torch.transpose(batch.incidences,0,1)[:n_edges_given]
-        self.references = torch.cat([batch.edges_toInf_pos, batch.edges_toInf_neg, edges_given], axis=0).cpu().detach().numpy()
+        n_edges_given = batch.incidences.shape[0]
+        self.references = torch.cat([batch.constr_toInf_pos, batch.constr_toInf_neg, batch.incidences], axis=0).cpu().detach().numpy()
 
-        padding = 9999*torch.ones_like(batch.edges_toInf_neg, dtype=torch.int64)[:,0].flatten()
-        self.true_type = torch.cat([batch.edges_toInf_pos_types, padding, batch.edge_features[:n_edges_given]], axis=0).cpu().detach().numpy()
+        padding = 9999*torch.ones_like(batch.constr_toInf_neg, dtype=torch.int64)[:,0].flatten()
+        self.true_type = torch.cat([batch.constr_toInf_pos_types, padding, batch.x_c], axis=0).cpu().detach().numpy()
         self.true_type_name = [reverse_edge_idx_map.get(i,'None') for i in self.true_type]
 
         if threshold is not None:
@@ -84,7 +82,7 @@ class EvalPrediction:
         """
         Returns a dict with information for the ith edge
 
-        index is the concatenation of:    edges_toInf_pos | edges_toInf_neg | edges_given
+        index is the concatenation of:    constr_toInf_pos | constr_toInf_neg | edges_given
         """
         category = self.edges_category[idx]
 

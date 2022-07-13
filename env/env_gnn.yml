@@ -1,0 +1,13 @@
+name: env_gnn
+
+channels:
+  - default
+  - conda-forge
+
+dependencies:
+  - python=3.9.12
+  - pip=22.0
+  - poetry=1.1.12
+  - pip:
+    - requests==2.25.0
+    

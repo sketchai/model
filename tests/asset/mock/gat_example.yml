@@ -9,25 +9,25 @@ logger:
 
 train_data: # Train data related parameters
   num_workers: 1
-  file_data: "tests/asset/dataset/mini_example/mini_final.npy" 
+  file_data: "tests/asset/dataset/mini_example/encoding_results.npy" 
   file_weights: "tests/asset/dataset/mini_example/mini_weights.npy"
   prop_max_edges_given: 0.9
   variation: 0.25
 
 val_data: # Val data related parameters
   num_workers: 1
-  file_data: "tests/asset/dataset/mini_example/mini_final.npy"
+  file_data: "tests/asset/dataset/mini_example/encoding_results.npy"
   prop_max_edges_given: 0.9
   variation: 0
 
 test_data: # Test data related parameters
   num_workers: 1
-  file_data: "tests/asset/dataset/mini_example/mini_final.npy"
+  file_data: "tests/asset/dataset/mini_example/encoding_results.npy"
   prop_max_edges_given: 0.75
   variation: 0
 
 train:
-  batch_size: 8
+  batch_size: 2
   max_epochs: 100
 
 optimizer:
@@ -36,7 +36,6 @@ optimizer:
   coef_neg: 1.
 
 model: # Architecture and model
-  n_head: 4
-  num_layers: 2
+  n_layers: 3
   embedding_dim : 240
   positional_encoding: True

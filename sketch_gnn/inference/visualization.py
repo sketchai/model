@@ -198,17 +198,17 @@ def display_inference(sketch: Sketch, pred: EvalPrediction, legend=True, categor
 
 def add_legend(d_categories, ax):
     handles = []
-    legend_labels = [
-            'True Positives {}',
-            'False Positives {}',
-            'True Positives wrong type {}',
-            'False Negatives {}',
-            'False Negatives wrong type {}',
-            'Given {}',
-    ]
-
+    legend_labels = {
+            'true_positives': 'True Positives {} /{}',
+            'false_positives': 'False Positives {} /{}',
+            'true_positives_wrong_type': 'True Positives wrong type {} /{}',
+            'false_negatives': 'False Negatives {} /{}',
+            'false_negatives_wrong_type': 'False Negatives wrong type {} /{}',
+    }
+    n_total_edges = sum((len(d_categories[category]) for category in legend_labels))
+    legend_labels['given'] = 'Given {}'
     for i, (category, color) in enumerate(COLOR_MAP.items()):
-        legend_label = legend_labels[i].format(len(d_categories[category]))
+        legend_label = legend_labels[category].format(len(d_categories[category]),n_total_edges)
         h = matplotlib.patches.Patch(color=color, label=legend_label)
         handles.append(h)
     legend = ax.legend(handles=handles, loc='upper left',fontsize="x-large")

@@ -19,7 +19,7 @@ class TestTestLoop(unittest.TestCase):
         with open(conf.get('prep_parms_path'), 'rb') as f:
             preprocessing_params = pickle.load(f)
         # Create DataLoader
-        data = SketchGraphDataModule(conf,preprocessing_params)
+        data = SketchGraphDataModule(conf)
 
         ######## STEP 2 : Init Model
         logger.info('-- Model initialization:...')
@@ -41,6 +41,7 @@ class TestTestLoop(unittest.TestCase):
         trainer = pl.Trainer(
             accelerator='cpu',
             callbacks=[],
+            max_epochs=-1,
             logger=False,
             )
         results = trainer.test(sketchPredictionmodel, dataloaders=data.test_dataloader())
