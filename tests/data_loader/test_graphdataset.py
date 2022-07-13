@@ -2,7 +2,7 @@ import unittest
 import logging
 import torch
 import numpy as np
-from sketch_gnn.utils.logger import logger
+logger = logging.getLogger(__name__)
 
 from sketch_gnn.dataloader.graph_data import GraphDataset
 

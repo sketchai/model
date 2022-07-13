@@ -4,8 +4,9 @@ from sam.constraint import Constraint
 from sam.sketch import Sketch
 from sam.primitive import Primitive
 from sketch_gnn.utils.format_encoding import format_for_encoding
-from sketch_gnn.utils.logger import logger
 from sketch_gnn.inference.eval import EvalPrediction
+import logging
+logger = logging.getLogger(__name__)
 
 
 NAME_TO_CONSTRAINT_MAP = {

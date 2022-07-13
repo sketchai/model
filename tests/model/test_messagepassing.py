@@ -14,8 +14,7 @@ from sketch_gnn.dataloader.generate_dataModule import SketchGraphDataModule
 
 
 
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 
 class TestMessagePassing(unittest.TestCase):

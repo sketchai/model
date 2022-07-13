@@ -15,7 +15,7 @@ except ModuleNotFoundError:
 from sketch_gnn.inference.metrics import sketch_wise_precision_recall
 from sketch_gnn.models.gat import GaT
 from sketch_gnn.utils.to_dict import stack_hparams
-from sketch_gnn.utils.logger import logger
+logger = logging.getLogger(__name__)
 
 
 class PredictSketch(pl.LightningModule):

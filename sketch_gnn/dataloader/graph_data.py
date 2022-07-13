@@ -3,8 +3,7 @@ import numpy as np
 import torch
 import logging
 
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 
 from sketch_gnn.utils.flat_array import load_flat_array

@@ -1,8 +1,9 @@
 from collections import defaultdict
 
 import torch
-from sketch_gnn.utils.logger import logger
+import logging
 import numpy as np
+logger = logging.getLogger(__name__)
 
 
 def sketch_wise_precision_recall(outputs, thr=0.95):

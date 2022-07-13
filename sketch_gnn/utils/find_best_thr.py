@@ -7,12 +7,12 @@ import pickle
 from argparse import ArgumentParser
 
 from torch import threshold
-from sketch_gnn.utils.logger import logger
 from sketch_gnn.utils.to_dict import parse_config
 from sketch_gnn.dataloader.generate_dataModule import SketchGraphDataModule
 from sketch_gnn.models.gat import GaT
 from sketch_gnn.models.predict import PredictSketch
 from sketch_gnn.inference.metrics import sketch_wise_precision_recall
+logger = logging.getLogger(__name__)
 
 if __name__=='__main__':
     parser = ArgumentParser()

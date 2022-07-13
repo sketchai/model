@@ -6,8 +6,7 @@ import enum
 from sketch_gnn.models.numerical_features.generator import generate_embedding
 from sketch_gnn.models.numerical_features.encoding import NumericalFeatureEncoding
 
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 
 class TestNumericalFeatures(unittest.TestCase):

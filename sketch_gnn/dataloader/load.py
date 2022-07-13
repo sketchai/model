@@ -4,8 +4,7 @@ from typing import Dict
 from sketch_gnn.dataloader.graph_data import GraphDataset
 
 import logging
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 def generate_dataset(conf: Dict, batch_size:int, collate_fn:object, sample=True):
 

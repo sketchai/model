@@ -1,8 +1,9 @@
 import unittest
+import logging
 import torch
 import numpy as np
 from sketch_gnn.inference.metrics import sketch_wise_precision_recall
-from sketch_gnn.utils.logger import logger
+logger = logging.getLogger(__name__)
 
 class TestMetrics(unittest.TestCase):
     def test_sk_wise_pr(self):

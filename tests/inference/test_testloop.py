@@ -5,10 +5,11 @@ import numpy as np
 import torch
 import pytorch_lightning as pl
 from sketch_gnn.models.predict import PredictSketch
-from sketch_gnn.utils.logger import logger
+import logging
 from sketch_gnn.utils.to_dict import parse_config
 from sketch_gnn.dataloader.generate_dataModule import SketchGraphDataModule
 from sketch_gnn.models.gat import GaT
+logger = logging.getLogger(__name__)
 
 class TestTestLoop(unittest.TestCase):
     def test_testloop(self):
@@ -38,7 +39,7 @@ class TestTestLoop(unittest.TestCase):
         logger.info('-- Logger and Trainer initialization:...')
         ######## STEP 3 : Init Trainer and launch evaluation on test
         trainer = pl.Trainer(
-            gpus=1,
+            accelerator='cpu',
             callbacks=[],
             logger=False,
             )

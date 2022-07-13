@@ -1,7 +1,8 @@
 import numpy as np
 import torch
 from sketch_gnn.models.gat import AttrDict
-from sketch_gnn.utils.logger import logger
+import logging
+logger = logging.getLogger(__name__)
 
 class EvalPrediction:
 

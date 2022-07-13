@@ -9,8 +9,7 @@ from sketch_gnn.dataloader.batch_data import GraBatch
 from sketch_gnn.utils.example_generator import ex_generator
 
 import logging
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 class AttrDict(dict):
     def __init__(self, base_dict:dict):

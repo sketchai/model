@@ -5,7 +5,7 @@ from sketch_gnn.dataloader.batch_data import GraBatch
 
 import logging
 
-from sketch_gnn.utils.logger import logger
+logger = logging.getLogger(__name__)
 
 RNG = np.random.default_rng()
 
