@@ -44,10 +44,13 @@ class PredictSketch(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         prediction = self.model(batch)
-
         loss = GaT.loss(prediction, batch, coef_neg=self.coef_neg, weight_types=None)
-        # Save loss
-        self.log('train/loss', loss, batch_size = batch.num_graphs)
+        e_pos_loss, e_neg_loss, e_type_loss = loss
+        self.log('train/loss', sum(loss), batch_size = batch.num_graphs)
+        self.log('train/edge_pos_loss', e_pos_loss, batch_size = batch.num_graphs)
+        self.log('train/edge_neg_loss', e_neg_loss, batch_size = batch.num_graphs)
+        self.log('train/edge_type_loss', e_type_loss, batch_size = batch.num_graphs)
+
         if batch_idx%100 == 0:
             edges_pos = prediction['edges_pos'].cpu().detach().numpy()
             edges_neg = prediction['edges_neg'].cpu().detach().numpy()
@@ -56,23 +59,20 @@ class PredictSketch(pl.LightningModule):
             frequency = self.max_epochs//10
             if batch_idx==0 and self.current_epoch%frequency==0:
                 self.log_pr_curve(edges_pos, edges_neg, tag='train')
-        return loss 
-
+        return sum(loss)
 
     def validation_step(self, batch, batch_idx):
-        # result = pl.EvalResult()
-
         with torch.no_grad():
             output = self.model(batch)
-            loss = GaT.loss(output, batch, coef_neg=self.coef_neg, weight_types=None).item()
+            loss = GaT.loss(output, batch, coef_neg=self.coef_neg, weight_types=None)
             edges_pos = output['edges_pos'].cpu().detach().numpy()
             edges_neg = output['edges_neg'].cpu().detach().numpy()
             predicted_type_pos = torch.argmax(output['type'], dim=-1).cpu().detach().numpy()
             predicted_type_neg = torch.argmax(output['type_neg'], dim=-1).cpu().detach().numpy()
             true_type = batch.constr_toInf_pos_types.cpu().detach().numpy()
 
-        self.log('val/loss', loss, batch_size=batch.num_graphs)
-        self.log('hp/val_loss', loss, batch_size=batch.num_graphs)
+        self.log('val/loss', sum(loss), batch_size=batch.num_graphs)
+        self.log('hp/val_loss', sum(loss), batch_size=batch.num_graphs)
 
         self.log_binary_classification(edges_pos, edges_neg, tag='val', batch_size=batch.num_graphs)
         self.log_multiclass(true_type, predicted_type_pos, tag='val', batch_size=batch.num_graphs)

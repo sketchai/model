@@ -114,7 +114,7 @@ class GaT(pl.LightningModule):
             }
 
 
-    def loss(self, prediction, data, coef_neg=1., weight_types=None):
+    def loss(prediction, data, coef_neg=1., weight_types=None):
         # device = data.edges_toInf_pos_types.device
         loss_edge_pos = torch.mean(torch.nn.functional.softplus(-prediction['edges_pos']))
         loss_edge_neg = torch.mean(torch.nn.functional.softplus(prediction['edges_neg']))
