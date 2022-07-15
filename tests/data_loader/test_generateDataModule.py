@@ -3,7 +3,7 @@ import logging
 import os
 import pickle
 from sketch_gnn.utils.to_dict import parse_config
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 
 from sketch_gnn.dataloader.generate_dataModule import SketchGraphDataModule
 
@@ -34,5 +34,5 @@ class TestSketchGraphDataModule(unittest.TestCase):
                 break
             logger.debug(f'batch = {batch} {i} /{len(val_dataset)}')
             logger.debug(f'batch.batch = {batch.batch}')
-            logger.debug(f'batch.edge = {batch.edge_index}')
+            logger.debug(f'batch.edge_index = {batch.edge_index}')
             # logger.debug(f'{i} batch:{batch}')

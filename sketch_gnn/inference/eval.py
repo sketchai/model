@@ -24,7 +24,7 @@ class EvalPrediction:
         self.references = torch.cat([batch.constr_toInf_pos, batch.constr_toInf_neg, batch.incidences], axis=0).cpu().detach().numpy()
 
         padding = 9999*torch.ones_like(batch.constr_toInf_neg, dtype=torch.int64)[:,0].flatten()
-        self.true_type = torch.cat([batch.constr_toInf_pos_types, padding, batch.x_c], axis=0).cpu().detach().numpy()
+        self.true_type = torch.cat([batch.constr_toInf_pos_types, padding, batch.edge_attr], axis=0).cpu().detach().numpy()
         self.true_type_name = [reverse_edge_idx_map.get(i,'None') for i in self.true_type]
 
         if threshold is not None:

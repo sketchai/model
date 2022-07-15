@@ -3,7 +3,6 @@ import unittest
 import logging
 import torch
 import pickle
-from sketch_gnn.models.msg_passing import GINBlock
 from sketch_gnn.utils.to_dict import parse_config
 
 from sketch_gnn.models.gat import GaT
