@@ -48,6 +48,8 @@ See test coverage : [TO COMPLETE]
 
 ## Start a training and see results
 
+Download the input data [here](https://huggingface.co/datasets/sketchai/sam-dataset)
+
 Configure the path to your data in the [configuration file](config/gat.yml).
 
 Start training: 
@@ -79,6 +81,8 @@ Open the path 'http://localhost:6006/' in your browser.
 
 ## Reproduce results
 
+Download pretrained models [here](https://huggingface.co/sketchai/sketch-gnn)
+
 Run the evaluation loop on the test dataset:
 
 ```
@@ -91,10 +95,6 @@ Play with your trained model in the [inference](notebook/inference.ipynb) notebo
 
 You will need to install [sam](https://github.com/sketchai/sam) and [ipywidgets](https://pypi.org/project/ipywidgets/) to visualize the results.
 
-Use the following notebook to inspect the input data :
-```
-jupyter-notebook ./notebook/data_input.ipynb
-```
 
 ## Docs
 
