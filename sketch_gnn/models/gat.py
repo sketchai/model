@@ -69,7 +69,11 @@ class GaT(pl.LightningModule):
         self.edge_msg_passing = torch.nn.ModuleList(edge_msg_passing)
         self.subnode_msg_passing = torch.nn.ModuleList(subnode_msg_passing)
 
-        self.skip_connections = d_model.get('skip_connections')
+        self.skip_connections = d_model.get('skip_connections') or []
+        if self.skip_connections:
+            self.concat_linear = ConcatenateLinear(
+                sizes=[emb_dim]*(len(self.skip_connections)+1),
+                output_size=emb_dim)
         self.prediction_edge = torch.nn.Linear(emb_dim, 1)
         self.prediction_type = torch.nn.Linear(emb_dim, len(d_prep.get('edge_idx_map')) - 1)
 
@@ -91,11 +95,16 @@ class GaT(pl.LightningModule):
         if self.positional_encoding is not None:
             x += self.positional_encoding(data.positions)
         
+        skip_x = []
         # Message Passing
         for i in range(self.n_layers):
+            if i in self.skip_connections:
+                skip_x.append(x)
             x = self.edge_msg_passing[i](x, edge_attr, data.edge_index)
             x = self.subnode_msg_passing[i](x, data.subnode_index)
 
+        if self.skip_connections:
+            x = self.concat_linear(x, *skip_x)
         edges_neg, edges_pos = data.constr_toInf_neg, data.constr_toInf_pos
         representation_final_edges = GaT.representation_final_edges(x, edges_neg, edges_pos)
         edges_pos_repr = representation_final_edges['edges_pos']
@@ -123,3 +132,33 @@ class GaT(pl.LightningModule):
         
         return loss_edge_pos, coef_neg * loss_edge_neg, loss_type
 
+    @torch.no_grad()
+    def embeddings(self, data):
+        embeddings = {}
+        # Compute node and edge embedding
+        x = self.node_embedding_layer(data.x)
+        embeddings['node_embeddings'] = x.cpu().detach().numpy()
+        edge_attr_no_subnodes = data.edge_attr[data.edge_attr != data.subnode_mapping[0].item()]
+        edge_attr = self.edge_embedding_layer(edge_attr_no_subnodes).repeat(2,1)
+        # Update input with positional encoding
+        if self.positional_encoding is not None:
+            x += self.positional_encoding(data.positions)
+        
+        skip_x = []
+        # Message Passing
+        for i in range(self.n_layers):
+            if i in self.skip_connections:
+                skip_x.append(x)
+            x = self.edge_msg_passing[i](x, edge_attr, data.edge_index)
+            x = self.subnode_msg_passing[i](x, data.subnode_index)
+        embeddings['node_after_msg_passing'] = x.cpu().detach().numpy()
+
+        if self.skip_connections:
+            x = self.concat_linear(x, *skip_x)
+        edges_neg, edges_pos = data.constr_toInf_neg, data.constr_toInf_pos
+        representation_final_edges = GaT.representation_final_edges(x, edges_neg, edges_pos)
+
+        embeddings['edges_pos_before_classif'] = representation_final_edges['edges_pos'].cpu().detach().numpy()
+        inferred_edges_pos_type = self.prediction_type(representation_final_edges['edges_pos']).cpu().detach().numpy()
+        embeddings['inferred_edges_pos_type'] = np.argmax(inferred_edges_pos_type,axis=1)
+        return embeddings

@@ -7,7 +7,7 @@ from torch_geometric.loader import DataLoader
 import logging
 logger = logging.getLogger(__name__)
 
-def generate_dataset(conf: Dict, batch_size:int, edge_idx_map:dict, sample=True):
+def generate_dataset(conf: Dict, batch_size:int, edge_idx_map:dict):
 
     ds = GraphDataset(
         path_seq=conf.get("path_data"),
@@ -16,7 +16,7 @@ def generate_dataset(conf: Dict, batch_size:int, edge_idx_map:dict, sample=True)
         variation=conf.get("variation"),
         edge_idx_map=edge_idx_map,
         )
-    if sample:
+    if conf.get("path_weights"):
         sampler = torch.utils.data.WeightedRandomSampler(ds.weights, len(ds.weights), replacement=True)
     else:
         sampler = None

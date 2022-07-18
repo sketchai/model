@@ -140,9 +140,8 @@ class GraphData(Data):
         mask_without_sn = (self.edge_attr != self.subnode_mapping)
         mask_with_sn = (self.edge_attr == self.subnode_mapping)
         half_edge_index = self.incidences[mask_without_sn].T
-        half_subnode_index = self.incidences[mask_with_sn].T
+        self.subnode_index = self.incidences[mask_with_sn].T
         self.edge_index = torch.cat([half_edge_index, half_edge_index.flip(dims=[0,])],dim=1)
-        self.subnode_index = torch.cat([half_subnode_index, half_subnode_index.flip(dims=[0,])],dim=1)
 
     @staticmethod
     def _select_constraints(i_edges_possible, prop_max_edges_given, variation=0):

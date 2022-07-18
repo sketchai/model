@@ -29,11 +29,11 @@ class SketchGraphDataModule(LightningDataModule):
 
     def val_dataloader(self):
         logger.info('-- Load Validation Set')
-        return generate_dataset(conf=self.d_val, batch_size=self.batch_size, edge_idx_map=self.edge_idx_map, sample=False)
+        return generate_dataset(conf=self.d_val, batch_size=self.batch_size, edge_idx_map=self.edge_idx_map)
 
     def test_dataloader(self):
         logger.info('-- Load Test Set')
-        return generate_dataset(conf=self.d_test, batch_size=self.batch_size, edge_idx_map=self.edge_idx_map, sample=False)
+        return generate_dataset(conf=self.d_test, batch_size=self.batch_size, edge_idx_map=self.edge_idx_map)
 
     def _kwargs_repr(self, *args, **kwargs):
         return self.__getattribute__('kwargs')

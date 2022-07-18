@@ -62,7 +62,7 @@ class ConcatLinearBlock(MessagePassing):
         return self.mlp(x + out)
     
     def message(self, x_j, edge_attr):
-        return self.cat_linear(x_j, edge_attr).relu()
+        return self.cat_linear(x_j, edge_attr)
 
 
 class SubnodeGINBlock(BipartiteGINBlock):

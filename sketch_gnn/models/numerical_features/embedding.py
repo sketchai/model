@@ -17,7 +17,6 @@ class NumericalFeatureEmbedding(pl.LightningModule):
     def __init__(self, feature_dims, embedding_dim, n_max_params):
         super(NumericalFeatureEmbedding, self).__init__()
         feature_dims = list(feature_dims)
-        logger.debug(n_max_params)
         feature_dims_padded = feature_dims + (n_max_params-len(feature_dims))*[0]
         self.register_buffer(
             'feature_offsets',
