@@ -28,7 +28,7 @@ test_data: # Test data related parameters
 
 train:
   batch_size: 2
-  max_epochs: 100
+  max_epochs: 2
 
 optimizer:
   lr: !!float 5e-4
@@ -37,5 +37,6 @@ optimizer:
 
 model: # Architecture and model
   n_layers: 3
-  embedding_dim : 240
+  embedding_dim : 24
   positional_encoding: True
+  skip_connections: [0,1]

@@ -34,9 +34,9 @@ class TestNodeEmbeddings(unittest.TestCase):
         iterator = iter(dataloader)
         batch = next(iterator)
         logger.debug(f'batch {batch}')
-        logger.debug(f'batch.x_p.shape {batch.x_p.shape}')
+        logger.debug(f'batch.x_p.shape {batch.x.shape}')
 
-        out = node_embedding.forward(node_features=batch.x_p)
+        out = node_embedding.forward(node_features=batch.x)
         logger.debug(f'out.shape {out}')
         
 
