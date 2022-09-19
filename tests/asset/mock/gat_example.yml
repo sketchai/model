@@ -1,0 +1,42 @@
+experiment:
+  dir: '.'
+
+file_prep_parms: "tests/asset/dataset/mini_example/preprocessing_params.pkl" #"preprocessing_params.pkl" # 
+logger:
+  save_dir : 'tests/asset/output'
+  name : 'gat_logs'
+  hparams_to_save: ['train', 'optimizer', 'model']
+
+train_data: # Train data related parameters
+  num_workers: 1
+  file_data: "tests/asset/dataset/mini_example/mini_final.npy" 
+  file_weights: "tests/asset/dataset/mini_example/mini_weights.npy"
+  prop_max_edges_given: 0.9
+  variation: 0.25
+
+val_data: # Val data related parameters
+  num_workers: 1
+  file_data: "tests/asset/dataset/mini_example/mini_final.npy"
+  prop_max_edges_given: 0.9
+  variation: 0
+
+test_data: # Test data related parameters
+  num_workers: 1
+  file_data: "tests/asset/dataset/mini_example/mini_final.npy"
+  prop_max_edges_given: 0.75
+  variation: 0
+
+train:
+  batch_size: 8
+  max_epochs: 100
+
+optimizer:
+  lr: !!float 5e-4
+  scheduler_step: 2
+  coef_neg: 1.
+
+model: # Architecture and model
+  n_head: 4
+  num_layers: 2
+  embedding_dim : 240
+  positional_encoding: True
