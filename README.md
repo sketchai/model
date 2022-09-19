@@ -1,37 +1,28 @@
 # deepmodel_attention
 
-In this package, we propose a ML model dedicated to constraint suggestions. It uses the [SAM preprocessing pipeline](https://github.com/sketchai/preprocessing) to prepare and filter sketches data. The predictions are in SAM format. As far SketchGraphs original format, the predictions can be converted using [the following package](https://github.com/sketchai/sketchgraph_vs_sam).
-
-![CAD_ML_inf](https://user-images.githubusercontent.com/103726832/184371778-3a82f8f1-198b-40b5-81d2-d3b5f8c8fc5a.gif)
-
 ## Installation
 
 1. Generate a conda env 
-First, create and activate a basic conda env from the [env_gat.yml](./env/env_gat.yml) file. 
+First, create and activate a basic conda env from the [env_gnn.yml](./env/env_gnn.yml) file. 
 
 Run 
 ```
-    conda env create -f ./env/env_gat.yml
+    conda env create -f ./env/env_gnn.yml
 ```
 
 then 
 
 ```
-    conda activate env_gat
+    conda activate env_gnn
 ```
 
+2. Follow the recommended installation for [pytorch](https://pytorch.org/) then [torch-geometric](https://pytorch-geometric.readthedocs.io/en/latest/notes/installation.html) and [pytorch-lightning](https://www.pytorchlightning.ai/)
 
-2. Install poetry and package dependencies
 
-To install package dependencies with poetry, 
+3. Install additional package dependencies via poetry
 
 ```
     poetry install
-```
-
-To update package dependencies, 
-```
-    poetry update
 ```
 
 ## Testing 
@@ -39,22 +30,22 @@ To update package dependencies,
 Run all the tests:
 
 ```
-    poetry run pytest 
+    pytest 
 ```
 
 Run a specific test:
 
 ```
-    poetry run pytest tests/model/test_messagepassing.py
+    pytest tests/model/test_messagepassing.py
 ```
 
 See test coverage : [TO COMPLETE]
 
 ## Start a training and see results
 
-Download the input data [here](https://huggingface.co/datasets/sketchai/sam-dataset)
-
 Configure the path to your data in the [configuration file](config/gat.yml).
+
+Data is available at [huggingface dev](https://huggingface.co/datasets/sketchai/sam-dataset/tree/dev)
 
 Start training: 
 
@@ -90,7 +81,7 @@ Download pretrained models [here](https://huggingface.co/sketchai/sketch-gnn)
 Run the evaluation loop on the test dataset:
 
 ```
-python testloop.py --path path/to/the/ckpt
+python evaluationloop.py --path path/to/the/ckpt --conf path/to/the/hparams.yml
 ```
 
 ## Notebooks

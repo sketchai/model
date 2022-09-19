@@ -11,7 +11,7 @@ class TestConcatenateLinear(unittest.TestCase):
 
     @classmethod
     def setUp(self):
-        self.concatenate = ConcatenateLinear(left_size=10, right_size=1, output_size=5)
+        self.concatenate = ConcatenateLinear(sizes=[10,1], output_size=5)
 
     def test_forward(self):
         right_tensor = torch.ones(2, 8)

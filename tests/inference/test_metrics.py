@@ -12,7 +12,7 @@ class TestMetrics(unittest.TestCase):
             'edges_neg': [5, -4, -3, -2],
             'n_edges_pos': [3,2],
             'n_edges_neg': [2,2],
-            'edges_toInf_pos_types': [1,2,3,4,5],
+            'constr_toInf_pos_types': [1,2,3,4,5],
             'type': np.zeros((5,12)),            
         }
         indexes = [(0,1), (1,2), (2,3), (3,10), (4,5)]

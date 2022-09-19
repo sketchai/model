@@ -36,9 +36,8 @@ optimizer:
   coef_neg: 1.
 
 model: # Architecture and model
-  version: "v2"
-  n_layers: 3 # number of msg passing layers
+  version: ConcatLinear + skip
+  n_layers: 5 # number of msg passing layers
   embedding_dim : 240
   positional_encoding: True
-  skip_connections: [0]
-  transformer_enc_n_layers: 2
+  skip_connections: [0,2]

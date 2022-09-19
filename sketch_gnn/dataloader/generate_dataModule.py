@@ -1,53 +1,39 @@
+import pickle
+from torch_geometric.data.lightning_datamodule import LightningDataModule
 import pytorch_lightning as pl
 import logging
 import functools
 from typing import Dict
 
 from sketch_gnn.dataloader.load import generate_dataset
-from sketch_gnn.dataloader.collate import collate 
-
-
 
 logger = logging.getLogger(__name__)
 
-class SketchGraphDataModule(pl.LightningDataModule):
-    def __init__(self,conf: Dict = None, preprocessing_params:Dict = {}):
-        super().__init__()
+class SketchGraphDataModule(LightningDataModule):
+
+    def __init__(self,conf: Dict ,*args, **kwargs):
+        super().__init__(has_test=True, has_val=True, *args,**kwargs)
         self.prepare_data_per_node = True
         
         self.batch_size = conf.get('train').get('batch_size')
         self.d_train = conf.get('train_data')
         self.d_val = conf.get('val_data')
         self.d_test = conf.get('test_data')
-        # collate all examples in one batch
-        self.collate_fn = functools.partial(collate, node_feature_dims=preprocessing_params.get('node_feature_dimensions'),
-                                        edge_feature_dims=preprocessing_params.get('edge_feature_dimensions'),
-                                        edge_idx_map = preprocessing_params.get('edge_idx_map'),
-                                        lMax=preprocessing_params.get('lMax'))
-
-
+        with open(conf.get('prep_parms_path'),'rb') as f:
+            d_prep = pickle.load(f)
+        self.edge_idx_map = d_prep['edge_idx_map']
 
     def train_dataloader(self):
         logger.info('-- Load Train Set')
-        collate_fn = functools.partial(
-            self.collate_fn,
-            prop_max_edges_given=self.d_train.get('prop_max_edges_given'),
-            variation=self.d_train.get('variation'))
-        return generate_dataset(conf=self.d_train, batch_size=self.batch_size, collate_fn=collate_fn)
+        return generate_dataset(conf=self.d_train, batch_size=self.batch_size, edge_idx_map=self.edge_idx_map)
 
     def val_dataloader(self):
         logger.info('-- Load Validation Set')
-        collate_fn = functools.partial(
-            self.collate_fn,
-            prop_max_edges_given=self.d_val.get('prop_max_edges_given'),
-            variation=self.d_val.get('variation'))
-        return generate_dataset(conf=self.d_val, batch_size=self.batch_size, collate_fn=collate_fn, sample=False)
+        return generate_dataset(conf=self.d_val, batch_size=self.batch_size, edge_idx_map=self.edge_idx_map)
 
     def test_dataloader(self):
-        collate_fn = functools.partial(
-            self.collate_fn,
-            prop_max_edges_given=self.d_test.get('prop_max_edges_given'),
-            variation=self.d_test.get('variation'))
-        return generate_dataset(conf=self.d_test, batch_size=self.batch_size, collate_fn=collate_fn, sample=False)
+        logger.info('-- Load Test Set')
+        return generate_dataset(conf=self.d_test, batch_size=self.batch_size, edge_idx_map=self.edge_idx_map)
 
-    # def test_dataloader(self): 
+    def _kwargs_repr(self, *args, **kwargs):
+        return self.__getattribute__('kwargs')

@@ -3,14 +3,7 @@ import unittest
 import logging
 import torch
 import pickle
-from sketch_gnn.utils.to_dict import parse_config
-
-
-
-from sketch_gnn.models.dense_emb import DenseSparsePreEmbedding
-
-from sketch_gnn.models.gat import GaT
-from sketch_gnn.dataloader.generate_dataModule import SketchGraphDataModule
+from sketch_gnn.models.msg_passing import SubnodeGINBlock, ConcatLinearBlock
 
 
 
@@ -20,46 +13,46 @@ logger = logging.getLogger(__name__)
 class TestMessagePassing(unittest.TestCase):
 
     def setUp(self):
-        # Load an example
-        conf = parse_config('tests/asset/mock/gat_example.yml')
-        with open(conf.get('file_prep_parms'), 'rb') as f:
-            d_prep = pickle.load(f)
 
-        # logger.info(f'--- d_prep= {d_prep}')
-        graph_dataset = SketchGraphDataModule(conf, d_prep)
-        self.dataset = graph_dataset.train_dataloader()
-        logger.debug(f'dataset size={len(self.dataset)}')
+        self.emb_dim = 5
 
-        # Model initialization
-        d_model = conf.get('model')
+    def test_concatlinearblock(self):
+        cl_block = ConcatLinearBlock(emb_dim=self.emb_dim)
 
-        use_cuda = not d_model.get('cpu') and torch.cuda.is_available()
-        self.device = torch.device('cuda') if use_cuda else 'cpu'
+        logger.debug(dict(cl_block.named_modules()))
 
-        self.gat = GaT(d_model, d_prep)
-        self.gat.to(self.device)
+        x = torch.arange(3*self.emb_dim).reshape(3,-1).float()
+        edge_attr = torch.arange(2*self.emb_dim).reshape(2,-1).float()
+        edge_index = torch.tensor([[0, 2],
+                                  [1, 2]], dtype=int)
+        logger.debug(f'x: {x}')
+        logger.debug(f'edge_attr: {edge_attr}')
+        logger.debug(f'edge_index: {edge_index}')
+        
+        # Test Message passing operation
+        x_msg = cl_block.message(x_j=x[edge_index[0]], edge_attr=edge_attr)
+        logger.debug(f'x_msg: {x_msg}')
 
-    def test_message(self):
+        x1 = cl_block.propagate(x=x, edge_attr=edge_attr, edge_index=edge_index)
+        logger.debug(f'x1: {x1}')
 
+        x0 = torch.arange(3*self.emb_dim).reshape(3,-1).float()
+        for m, i in enumerate(edge_index[1]):
+            x0[i] += x_msg[m]
+        torch.testing.assert_allclose(x0,x+x1)
 
-        for i, data in enumerate(self.dataset):
-            if i == 0 :
-                continue
-            # Compute node and edge embedding
-            logger.info(f'data.node_features: {data.node_features}')
-            logger.info(f'data.sparse_node_features: {data.sparse_node_features}')
+        # Test the complete block
+        x2 = cl_block(x=x, edge_attr=edge_attr, edge_index=edge_index)
+        logger.debug(f'x2: {x2}')
 
-            node_embedding = self.gat.node_embedding(data.node_features, data.sparse_node_features)
-            edge_embedding = self.gat.edge_embedding(data.edge_features, data.sparse_edge_features)
+    def test_bipartiteginblock(self):
+        gin_block = SubnodeGINBlock(emb_dim=self.emb_dim)
+        x = torch.arange(3*self.emb_dim).reshape(3,-1).float()
+        edge_index = torch.tensor([[0, 1],
+                                  [2, 2]], dtype=int)
+        out = gin_block.forward(x=x, edge_index=edge_index)
 
-            # Agregate node and edge information (message passing)
-            logger.info(f'node embedding: {node_embedding}')
-            logger.info(f'edge embedding: {edge_embedding}')
-            agreg = self.gat.aggregate_by_incidence(node_embedding, data.incidences.to(self.device), edge_embedding)
-
-            logger.info(f'agreg: {agreg}')
-            # input_embedding = node_embedding + agreg
-            break
+        logger.debug(out)
 
 
 

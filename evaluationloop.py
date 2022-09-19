@@ -2,7 +2,7 @@
 Evaluate model on test set
 
 Threshold value can be adjusted first on validation set by running:
-python sketch_gnn/utils/find_best_thr.py --path path/to/your model
+python sketch_gnn/utils/find_best_thr.py --path path/to/your/model --conf path/to/the/hparam.yml
 """
 
 import logging 
@@ -10,7 +10,7 @@ import pytorch_lightning as pl
 import pickle
 import numpy as np
 from argparse import ArgumentParser
-from sketch_gnn.utils.to_dict import parse_config
+from sketch_gnn.utils.to_dict import parse_config, yaml_to_dict
 from sketch_gnn.dataloader.generate_dataModule import SketchGraphDataModule
 from sketch_gnn.models.gat import GaT
 from sketch_gnn.models.predict import PredictSketch
@@ -21,6 +21,7 @@ if __name__=='__main__':
     logger = logging.getLogger(__name__)
     parser = ArgumentParser()
     parser.add_argument('--path', help= 'path to your model checkpoint')
+    parser.add_argument('--conf', help= 'path to your model hparams', default= None)
     parser.add_argument('--thr', default=0.98, help='threshold used for evaluation', type=float)
     parser.add_argument('--prop', help='prop of edges given', type=float, required=False)
 
@@ -28,25 +29,25 @@ if __name__=='__main__':
     ######## STEP 1 : Init Datasets
     conf = parse_config('config/gat.yml')
     # Initialize parameters
-    d_train = conf.get('train')
     with open(conf.get('prep_parms_path'), 'rb') as f:
         preprocessing_params = pickle.load(f)
 
     ######## STEP 2 : Init Model
     logger.info('-- Model initialization:...')
     # Model initialization
-    d_model = conf.get('model')
+    if args.conf is None:
+        d_model = conf.get('model')
+    else:
+        d_model = yaml_to_dict(args.conf)
     model = GaT(d_model, preprocessing_params)
 
     conf['edge_idx_map'] = preprocessing_params.get('edge_idx_map')
     conf['node_idx_map'] = preprocessing_params.get('node_idx_map')
 
-    # args.path = '~/data/sg/models/v004/gat-epoch=102-val_loss=0.00.ckpt'
-
     sketchPredictionmodel = PredictSketch.load_from_checkpoint(
         checkpoint_path=args.path,
         model= model,
-        conf= conf)
+        conf= None) # No need for training config
     logger.info('-- Model initialization: end')
 
     logger.info('-- Logger and Trainer initialization:...')
@@ -57,7 +58,7 @@ if __name__=='__main__':
         logger=False,
         )
     prop = args.prop or conf['test_data']['prop_max_edges_given']
-    data = SketchGraphDataModule(conf,preprocessing_params)
+    data = SketchGraphDataModule(conf)
     _ = trainer.test(sketchPredictionmodel, dataloaders=data.test_dataloader())
     
     results = sketchPredictionmodel.test_results

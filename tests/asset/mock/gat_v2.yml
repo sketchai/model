@@ -36,11 +36,10 @@ optimizer:
   coef_neg: 1.
 
 model: # Architecture and model
-  version: "Og bis"
-  n_layers: 1 # number of msg passing layers
+  version: "v2"
+  n_layers: 3 # number of msg passing layers
   embedding_dim : 24
   positional_encoding: True
-  skip_connections: []
-  transformer_layers: []
+  skip_connections: [0]
   transformer_enc_n_layers: 2
 

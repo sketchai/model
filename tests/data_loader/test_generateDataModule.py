@@ -3,7 +3,7 @@ import logging
 import os
 import pickle
 from sketch_gnn.utils.to_dict import parse_config
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 
 from sketch_gnn.dataloader.generate_dataModule import SketchGraphDataModule
 
@@ -12,9 +12,7 @@ class TestSketchGraphDataModule(unittest.TestCase):
     def test_creation(self):
 
         conf = parse_config('tests/asset/mock/gat_example.yml')
-        with open(conf.get('prep_parms_path'), 'rb') as f:
-            d_prep = pickle.load(f)
-        graph_dataset = SketchGraphDataModule(conf, d_prep)
+        graph_dataset = SketchGraphDataModule(conf)
 
         logger.debug(f'graph dataset: {graph_dataset}')
 
@@ -30,12 +28,11 @@ class TestSketchGraphDataModule(unittest.TestCase):
         # logger.debug(f'val_dataset: {val_dataset}')
         self.assertTrue(len(val_dataset) > 0)
         
-        logger.debug(f'HERE')
+        logger.debug(len(val_dataset))
         for i, batch in enumerate(val_dataset):
-            logger.debug(f'HERE')
             if i > 2 :
                 break
             logger.debug(f'batch = {batch} {i} /{len(val_dataset)}')
+            logger.debug(f'batch.batch = {batch.batch}')
+            logger.debug(f'batch.edge_index = {batch.edge_index}')
             # logger.debug(f'{i} batch:{batch}')
-
-# piste pour le collate function: https://www.scottcondron.com/jupyter/visualisation/audio/2020/12/02/dataloaders-samplers-collate.html

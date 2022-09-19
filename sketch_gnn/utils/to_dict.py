@@ -17,8 +17,9 @@ def parse_config(file_path: str) -> Dict:
     main_dir = conf.get('experiment').get('dir')
     conf['logger']['save_dir'] = os.path.join(main_dir, conf['logger']['save_dir'])
     conf['prep_parms_path'] = os.path.join(main_dir, conf['file_prep_parms'])
-    conf['train_data']['path_data'] = os.path.join(main_dir, conf['train_data']['file_data'])    
-    conf['train_data']['path_weights'] = os.path.join(main_dir, conf['train_data']['file_weights'])   
+    conf['train_data']['path_data'] = os.path.join(main_dir, conf['train_data']['file_data'])
+    if conf['train_data'].get('file_weights'):
+        conf['train_data']['path_weights'] = os.path.join(main_dir, conf['train_data']['file_weights'])   
     conf['val_data']['path_data'] = os.path.join(main_dir, conf['val_data']['file_data'])
     conf['test_data']['path_data'] = os.path.join(main_dir, conf['test_data']['file_data'])
     return conf

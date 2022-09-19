@@ -27,7 +27,7 @@ with open(conf.get('prep_parms_path'), 'rb') as f:
     preprocessing_params = pickle.load(f)
 
 # Create DataLoader
-data = SketchGraphDataModule(conf,preprocessing_params)
+data = SketchGraphDataModule(conf)
 
 
 ######## STEP 2 : Init Model
@@ -52,8 +52,8 @@ logger_tensorboard = TensorBoardLogger(
     name = logger_conf.get('name'),
     log_graph=False,
     default_hp_metric=False)
-scheduler = schedule(wait=1, warmup=2, active=8)
-profiler = PyTorchProfiler(profile_memory=True,export_to_chrome=True,schedule=scheduler)
+# scheduler = schedule(wait=1, warmup=2, active=8)
+# profiler = PyTorchProfiler(profile_memory=True,export_to_chrome=True,schedule=scheduler)
 
 checkpoint_callback = ModelCheckpoint(monitor='val/loss',
                                         filename='gat-{epoch:02d}-{val_loss:.2f}',
@@ -61,9 +61,9 @@ checkpoint_callback = ModelCheckpoint(monitor='val/loss',
                                         save_weights_only=True)
 if __name__=='__main__':
     trainer = pl.Trainer(
-            # accelerator='gpu',
+        # accelerator='gpu',
         # devices=4,
-        # strategy='ddp',
+        # strategy='ddp_spawn',
         gpus=1,
         max_epochs=d_train.get('max_epochs'), 
         # progress_bar_refresh_rate=20, 
@@ -71,7 +71,7 @@ if __name__=='__main__':
         # limit_train_batches=5,
         # limit_val_batches=5,
         callbacks=[checkpoint_callback],
-        # profiler=profiler,
+        profiler='simple',
     )
     logger.info('-- Logger and Trainer initialization: end')
 

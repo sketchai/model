@@ -17,7 +17,7 @@ def sketch_wise_precision_recall(outputs, thr=0.95):
         cat_edges_neg = 1 / (1 + np.exp(-outputs['edges_neg']))
         n_edges_pos = outputs['n_edges_pos']
         n_edges_neg = outputs['n_edges_neg']
-        cat_true_type = outputs['edges_toInf_pos_types']
+        cat_true_type = outputs['constr_toInf_pos_types']
         cat_predicted_type_pos = np.argmax(outputs['type'], axis=-1)
         logger.debug(f'types = {cat_predicted_type_pos}')
         precision=[]
